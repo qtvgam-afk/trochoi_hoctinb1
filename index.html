@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>🌊 Giải Mã Tín Hiệu Xanh — Trò Chơi</title>
+    <!-- Firebase SDK (compat v9) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;800;900&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap");
 
@@ -2930,7 +2933,55 @@
     </div>
 
     <script>
-      // ═══════════════════════════════════════════
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  databaseURL: "YOUR_DATABASE_URL",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+// ── Khởi tạo Firebase an toàn: chỉ chạy nếu SDK đã load và config thật ──
+let db = null;
+const _firebaseReady = (
+  typeof firebase !== "undefined" &&
+  firebaseConfig.apiKey &&
+  firebaseConfig.apiKey !== "YOUR_API_KEY"
+);
+
+if (_firebaseReady) {
+  try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+    console.log("✅ Firebase đã kết nối.");
+  } catch(e) {
+    console.warn("Firebase init lỗi:", e);
+  }
+} else {
+  console.info("ℹ️ Firebase SDK chưa load hoặc chưa cấu hình → chạy offline (localStorage).");
+}
+
+let liveStudents = {};
+
+function startRealtimeMonitor() {
+  if (!db) {
+    console.info("ℹ️ Không có Firebase → bỏ qua realtime monitor.");
+    return;
+  }
+  try {
+    db.ref("students").on("value", (snapshot) => {
+      liveStudents = snapshot.val() || {};
+      if (typeof syncLiveData === "function") syncLiveData();
+    });
+  } catch(e) {
+    console.warn("Firebase realtime monitor lỗi:", e);
+  }
+}
+
+// ═══════════════════════════════════════════
       //  GAME DATA
       // ═══════════════════════════════════════════
       const SIGNALS_DATA = [
@@ -3264,9 +3315,9 @@
         grid.innerHTML = SIGNALS_DATA.map(
           (s) => `
     <div class="signal-card" id="sc-${s.id}">
-      <div class="sig-icon">${s.icon}</div>
-      <div class="sig-label">${s.label}</div>
-      <div class="sig-content">${s.content}</div>
+      <div class="sc-icon">${s.icon}</div>
+      <div class="sc-label">${s.label}</div>
+      <div class="sc-content">${s.content}</div>
       <div class="signal-btns">
         <button class="sig-btn raw" onclick="classifySignal(${s.id},'raw')">📦 Dữ liệu thô</button>
         <button class="sig-btn info" onclick="classifySignal(${s.id},'info')">✅ Thông tin</button>
@@ -3785,7 +3836,7 @@
           showScreen("s-teacher-dash");
           switchTab("monitor");
           syncLiveData();
-          startLivePolling();
+          startRealtimeMonitor();
         } else {
           document.getElementById("pin-error").textContent =
             "❌ Mã PIN không đúng. Thử lại!";
@@ -3811,26 +3862,11 @@
       // ═══════════════════════════════════════════
       //  LIVE MONITORING — reads student localStorage data
       // ═══════════════════════════════════════════
-      function getAllStudentData() {
-        const groups = [];
-        // Scan all localStorage keys for student progress
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && key.startsWith("gmtx_progress_")) {
-            try {
-              const data = JSON.parse(localStorage.getItem(key));
-              if (data && data.groupName) groups.push(data);
-            } catch(e) {}
-          }
-        }
-        // Sort by total score desc
-        groups.sort((a, b) => {
-          const ta = (a.scores?.c1||0)+(a.scores?.c2||0)+(a.scores?.c3||0)+(a.scores?.c4||0)+(a.bonus||0);
-          const tb = (b.scores?.c1||0)+(b.scores?.c2||0)+(b.scores?.c3||0)+(b.scores?.c4||0)+(b.bonus||0);
-          return tb - ta;
-        });
-        return groups;
-      }
+      
+function getAllStudentData() {
+  return Object.values(liveStudents || {});
+}
+
 
       function getStudentStageProgress(data) {
         // Determine which stages have been attempted
@@ -3947,14 +3983,18 @@
 
       function clearAllStudentData() {
         if (!confirm("Xóa toàn bộ dữ liệu học sinh? Hành động này không thể hoàn tác!")) return;
+        // Xóa localStorage
         const keysToDelete = [];
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
           if (key && key.startsWith("gmtx_progress_")) keysToDelete.push(key);
         }
         keysToDelete.forEach(k => localStorage.removeItem(k));
+        // Xóa Firebase Realtime Database
+        try { db.ref("students").remove(); } catch(e) {}
+        liveStudents = {};
         syncLiveData();
-        showToast("Đã xóa dữ liệu học sinh", "success");
+        showToast("Đã xóa toàn bộ dữ liệu học sinh", "success");
       }
 
       function revealLeaderboard() {
@@ -4025,29 +4065,40 @@
       //  STUDENT PROGRESS SAVE
       // ═══════════════════════════════════════════
       function saveStudentProgress(complete = false, finalTotal = 0) {
+        const bonusCalc = state.hintsUsed === 0 ? 3 : -(state.hintsUsed * 3);
+        const data = {
+          name: state.groupName,           // dùng 'name' để syncLiveData đọc đúng
+          scores: { ...state.scores },
+          hintsUsed: state.hintsUsed,
+          bonus: complete ? bonusCalc : 0, // chỉ tính thưởng khi hoàn thành
+          complete,
+          finalTotal,
+          currentStage: state.currentStage,
+          timestamp: Date.now(),
+        };
+
+        // 1) Lưu localStorage (backup cục bộ)
         try {
-          const data = {
-            groupName: state.groupName,
-            scores: state.scores,
-            hintsUsed: state.hintsUsed,
-            complete,
-            finalTotal,
-            timestamp: Date.now(),
-          };
           localStorage.setItem(
             "gmtx_progress_" + slugify(state.groupName),
             JSON.stringify(data),
           );
-          // Also update teacher table if group exists
-          const existing = teacherGroups.find(
-            (g) => g.name === state.groupName,
-          );
-          if (existing) {
-            existing.scores = { ...state.scores };
-            existing.complete = complete;
-            saveTeacherData();
-          }
         } catch (e) {}
+
+        // 2) Đẩy lên Firebase Realtime Database (real-time cho GV)
+        try {
+          if (db) db.ref("students/" + slugify(state.groupName)).set(data);
+        } catch (e) {
+          console.warn("Firebase save failed:", e);
+        }
+
+        // 3) Cập nhật bảng GV đã đăng ký trước (nếu có)
+        const existing = teacherGroups.find((g) => g.name === state.groupName);
+        if (existing) {
+          existing.scores = { ...state.scores };
+          existing.complete = complete;
+          saveTeacherData();
+        }
       }
 
       function slugify(s) {
@@ -4064,12 +4115,13 @@
       }
 
       function refreshLeaderboard() {
-        const sorted = [...teacherGroups].sort((a, b) => {
-          const ta =
-            a.scores.c1 + a.scores.c2 + a.scores.c3 + a.scores.c4 + a.bonus;
-          const tb =
-            b.scores.c1 + b.scores.c2 + b.scores.c3 + b.scores.c4 + b.bonus;
-          return tb - ta;
+        // Ưu tiên dữ liệu thực từ Firebase; fallback sang teacherGroups nếu chưa có Firebase
+        const allData = getAllStudentData();
+        const lbSource = allData.length ? allData : teacherGroups;
+
+        const sorted = [...lbSource].sort((a, b) => {
+          const s = x => (x.scores?.c1||0)+(x.scores?.c2||0)+(x.scores?.c3||0)+(x.scores?.c4||0)+(x.bonus||0);
+          return s(b) - s(a);
         });
 
         const medals = ["🥇", "🥈", "🥉"];
@@ -4079,36 +4131,31 @@
         const list = document.getElementById("lb-list");
         if (!sorted.length) {
           list.innerHTML =
-            '<div style="text-align:center;color:rgba(255,255,255,.4);padding:3rem;font-size:1.1rem">Chưa có dữ liệu nhóm.<br>Thêm nhóm trong bảng điều khiển giáo viên.</div>';
+            '<div style="text-align:center;color:rgba(255,255,255,.4);padding:3rem;font-size:1.1rem">Chưa có dữ liệu nhóm.<br>Chờ học sinh bắt đầu chơi...</div>';
           return;
         }
 
         list.innerHTML = sorted
           .map((g, i) => {
-            const total =
-              g.scores.c1 + g.scores.c2 + g.scores.c3 + g.scores.c4 + g.bonus;
+            const scores = g.scores || {};
+            const bonus = g.bonus || 0;
+            const total = (scores.c1||0)+(scores.c2||0)+(scores.c3||0)+(scores.c4||0)+bonus;
+            const groupName = g.name || g.groupName || "Nhóm ?";
             const rankClass = i < 3 ? `rank-${i + 1}` : "";
-            const rankDisplay =
-              i < 3
+            const rankDisplay = i < 3
                 ? `<span class="lb-rank">${i + 1}</span>`
                 : `<span class="lb-rank other">${i + 1}</span>`;
-            const medal =
-              i < 3
+            const medal = i < 3
                 ? `<span class="lb-medal">${medals[i]}</span>`
                 : '<span class="lb-medal"></span>';
             const stagePills = stageNames
-              .map(
-                (s, si) => `
-      <span class="lb-stage-pill ${s}">${stageLabels[si]}: ${g.scores[s]}</span>
-    `,
-              )
+              .map((s, si) => `<span class="lb-stage-pill ${s}">${stageLabels[si]}: ${scores[s] !== undefined ? scores[s] : '–'}</span>`)
               .join("");
-            const totalClass = i < 3 ? "" : i + 1 + ' class="other-total"';
             return `<div class="lb-row ${rankClass}">
       ${rankDisplay}
       ${medal}
-      <div class="lb-name">${g.name}${g.complete ? '<span style="font-size:.7rem;color:var(--teal);margin-left:.5rem;font-weight:600">✓ Done</span>' : ""}</div>
-      <div class="lb-stages">${stagePills}${g.bonus ? `<span class="lb-stage-pill" style="background:rgba(0,200,150,.15);color:#6EE7B7">+${g.bonus > 0 ? "+" : ""}${g.bonus}</span>` : ""}</div>
+      <div class="lb-name">${groupName}${g.complete ? '<span style="font-size:.7rem;color:var(--teal);margin-left:.5rem;font-weight:600">✓ Done</span>' : ""}</div>
+      <div class="lb-stages">${stagePills}${bonus ? `<span class="lb-stage-pill" style="background:rgba(0,200,150,.15);color:#6EE7B7">${bonus > 0 ? '+' : ''}${bonus}</span>` : ""}</div>
       <div class="lb-total ${i >= 3 ? "other-total" : ""}">${total}</div>
     </div>`;
           })
@@ -4180,10 +4227,21 @@
     </script>
   
 <script>
-  const gameAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  let gameAudioCtx = null;
+
+  function getAudioCtx() {
+    if (!gameAudioCtx) {
+      try {
+        gameAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      } catch(e) { return null; }
+    }
+    return gameAudioCtx;
+  }
 
   function playTone(freq = 440, duration = 0.12, type = "sine", volume = 0.05) {
-    if (!gameAudioCtx) return;
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    const gameAudioCtx = ctx;
 
     const osc = gameAudioCtx.createOscillator();
     const gain = gameAudioCtx.createGain();
@@ -4234,13 +4292,4 @@
 
 
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  window.c2MCAnswers = window.c2MCAnswers || {};
-  window.c2MCScore = window.c2MCScore || 0;
-
-  document.querySelectorAll(".mc-options").forEach((group, qIndex) => {
-    // ... (và tất cả phần bên trong)
-  });
-});
-</script>
+<!-- Stub script đã được xoá (code rỗng, không cần thiết) -->
