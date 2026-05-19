@@ -3901,6 +3901,9 @@
             existing.scores = { ...state.scores };
             existing.complete = complete;
 
+            // Tự động cộng thưởng nếu không dùng cầu cứu
+            existing.bonus = state.hintsUsed === 0 ? 3 : 0;
+
             // Lưu tổng điểm cuối cùng để dùng cho BXH
             existing.finalTotal = finalTotal;
 
@@ -3970,7 +3973,7 @@
       ${rankDisplay}
       ${medal}
       <div class="lb-name">${g.name}${g.complete ? '<span style="font-size:.7rem;color:var(--teal);margin-left:.5rem;font-weight:600">✓ Done</span>' : ""}</div>
-      <div class="lb-stages">${stagePills}${g.bonus ? `<span class="lb-stage-pill" style="background:rgba(0,200,150,.15);color:#6EE7B7">+${g.bonus > 0 ? "+" : ""}${g.bonus}</span>` : ""}</div>
+      <div class="lb-stages">${stagePills}${g.bonus ? `<span class="lb-stage-pill" style="background:rgba(0,200,150,.15);color:#6EE7B7">🎁 ${g.bonus > 0 ? "+" : ""}${g.bonus} Không cầu cứu</span>` : ""}</div>
       <div class="lb-total ${i >= 3 ? "other-total" : ""}">${total}</div>
     </div>`;
           })
