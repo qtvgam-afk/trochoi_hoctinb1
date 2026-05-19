@@ -4,9 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>🌊 Giải Mã Tín Hiệu Xanh — Trò Chơi</title>
-    <!-- Firebase SDK (compat v9) -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;800;900&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap");
 
@@ -1319,83 +1316,6 @@
         min-height: 1.2rem;
       }
 
-      /* ── TEACHER TABS ─── */
-      .t-tab {
-        background: transparent;
-        border: none;
-        color: rgba(255,255,255,.5);
-        padding: .75rem 1.25rem;
-        font-family: "Be Vietnam Pro", sans-serif;
-        font-size: .85rem;
-        font-weight: 600;
-        cursor: pointer;
-        border-bottom: 2px solid transparent;
-        transition: all .2s;
-        white-space: nowrap;
-      }
-      .t-tab:hover { color: rgba(255,255,255,.8); }
-      .t-tab.active { color: var(--teal); border-bottom-color: var(--teal); }
-      .tab-panel { display: none; }
-      .tab-panel.active { display: block; }
-
-      /* ── LIVE MONITOR ─── */
-      .live-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 1rem;
-        padding: 1.25rem 0 1rem;
-        flex-wrap: wrap;
-      }
-      .live-score-card {
-        background: var(--card);
-        border: 1.5px solid var(--border);
-        border-radius: var(--rm);
-        padding: .85rem 1rem;
-        text-align: center;
-      }
-      .live-score-card .lsc-val {
-        font-family: "Exo 2", sans-serif;
-        font-size: 1.6rem;
-        font-weight: 900;
-        color: var(--g1);
-        line-height: 1;
-      }
-      .live-score-card .lsc-label {
-        font-size: .7rem;
-        color: var(--mu);
-        margin-top: 3px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: .04em;
-      }
-      .status-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        font-size: .72rem;
-        font-weight: 700;
-        padding: 3px 9px;
-        border-radius: 999px;
-      }
-      .status-playing { background: #dbeafe; color: #1e40af; }
-      .status-done { background: #d1fae5; color: var(--g1); }
-      .status-waiting { background: var(--border); color: var(--mu); }
-      .stage-prog-bar {
-        display: flex;
-        gap: 2px;
-        margin-top: 4px;
-      }
-      .stage-prog-seg {
-        flex: 1;
-        height: 5px;
-        border-radius: 999px;
-        background: var(--border);
-        transition: background .3s;
-      }
-      .stage-prog-seg.done { background: var(--teal); }
-      .stage-prog-seg.partial { background: var(--c3); }
-
       /* ── TEACHER DASHBOARD ─── */
       #s-teacher-dash.active {
         display: block;
@@ -2568,11 +2488,8 @@
       <div class="teacher-topbar">
         <h1>🎮 Bảng Điều Khiển Giáo Viên</h1>
         <span class="tb-badge" id="t-group-count">0 nhóm</span>
-        <span class="tb-badge" id="t-live-badge" style="background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.4);color:#fca5a5;display:none">
-          <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#ef4444;animation:pulse 1s infinite;margin-right:4px"></span>LIVE
-        </span>
-        <button class="btn btn-teal btn-sm" onclick="revealLeaderboard()">
-          🏆 Công bố Kết quả
+        <button class="btn btn-teal btn-sm" onclick="showLeaderboard()">
+          📊 Chiếu Bảng Xếp Hạng
         </button>
         <button
           class="btn btn-ghost btn-sm"
@@ -2582,97 +2499,68 @@
           Thoát
         </button>
       </div>
-
-      <!-- TABS -->
-      <div style="background:#0f172a;padding:0 1.5rem;display:flex;gap:0;border-bottom:1px solid rgba(255,255,255,.08)">
-        <button class="t-tab active" id="tab-monitor" onclick="switchTab('monitor')">👁️ Quan sát trực tiếp</button>
-        <button class="t-tab" id="tab-setup" onclick="switchTab('setup')">⚙️ Cài đặt nhóm</button>
-        <button class="t-tab" id="tab-guide" onclick="switchTab('guide')">📋 Lịch trình GV</button>
-      </div>
-
-      <!-- TAB: MONITOR (LIVE) -->
-      <div id="tab-panel-monitor" class="tab-panel active">
-        <div class="wrap-wide">
-          <div class="live-header">
-            <div>
-              <div style="font-size:1.1rem;font-weight:800;color:var(--txt)">📡 Theo dõi trực tiếp</div>
-              <div style="font-size:0.8rem;color:var(--mu);margin-top:2px">Tự động cập nhật điểm khi học sinh nộp bài · Cập nhật mỗi 5 giây</div>
-            </div>
-            <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">
-              <span id="live-last-update" style="font-size:.75rem;color:var(--mu)"></span>
-              <button class="btn btn-primary btn-sm" onclick="syncLiveData()">🔄 Làm mới ngay</button>
-              <button class="btn btn-ghost btn-sm" style="color:var(--red);border-color:var(--red)" onclick="clearAllStudentData()">🗑️ Xóa dữ liệu</button>
-            </div>
+      <div class="wrap-wide">
+        <div class="sec-title">Thêm Nhóm Học Sinh</div>
+        <div class="tg-add">
+          <div class="form-group">
+            <label>Tên Nhóm</label>
+            <input
+              type="text"
+              id="t-group-input"
+              placeholder="VD: Nhóm 1"
+              maxlength="30"
+            />
           </div>
+          <button class="btn btn-primary" onclick="addTeacherGroup()">
+            + Thêm nhóm
+          </button>
+          <button
+            class="btn btn-ghost btn-sm"
+            onclick="clearAllGroups()"
+            style="color: var(--red); border-color: var(--red)"
+          >
+            🗑️ Xóa tất cả
+          </button>
+        </div>
 
-          <!-- SUMMARY CARDS -->
-          <div id="live-summary-row" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.75rem;margin-bottom:1.5rem"></div>
-
-          <!-- LIVE TABLE -->
-          <div style="overflow-x:auto">
-            <table class="group-table" id="live-table">
-              <thead>
-                <tr>
-                  <th style="width:40px">#</th>
-                  <th>Nhóm</th>
-                  <th style="text-align:center">C1<br><small>Thu nhận</small></th>
-                  <th style="text-align:center">C2<br><small>Lưu trữ</small></th>
-                  <th style="text-align:center">C3<br><small>Xử lý</small></th>
-                  <th style="text-align:center">C4<br><small>Truyền tin</small></th>
-                  <th style="text-align:center">Thưởng</th>
-                  <th style="text-align:center;color:var(--g1)">Tổng ↓</th>
-                  <th style="text-align:center">Trạng thái</th>
-                </tr>
-              </thead>
-              <tbody id="live-tbody">
-                <tr><td colspan="9" style="text-align:center;color:var(--mu);padding:3rem;font-size:.9rem">
-                  Chờ học sinh tham gia... <br><span style="font-size:.78rem;opacity:.7">Dữ liệu sẽ hiện tự động khi các nhóm bắt đầu chơi</span>
-                </td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div style="font-size:.75rem;color:var(--mu);margin-top:.75rem;text-align:right" id="live-note">
-            ℹ️ Dữ liệu lấy từ localStorage của trình duyệt này — học sinh phải chơi trên cùng thiết bị/trình duyệt
+        <div class="flex-between" style="margin-bottom: 0.5rem">
+          <div class="sec-title" style="margin: 0">Bảng theo dõi điểm số</div>
+          <div style="font-size: 0.78rem; color: var(--mu)">
+            Nhập điểm thủ công hoặc đọc từ màn hình học sinh
           </div>
         </div>
-      </div>
-
-      <!-- TAB: SETUP -->
-      <div id="tab-panel-setup" class="tab-panel" style="display:none">
-        <div class="wrap-wide">
-          <div class="sec-title">Đăng ký nhóm trước (tùy chọn)</div>
-          <div style="background:var(--c1bg);border:1px solid #bfdbfe;border-radius:var(--rm);padding:.85rem 1rem;margin-bottom:1.25rem;font-size:.83rem;color:var(--c1d);line-height:1.6">
-            💡 <strong>Ghi chú:</strong> Bước này <em>không bắt buộc</em>. Học sinh tự đăng ký tên nhóm khi chơi và dữ liệu sẽ tự hiện ở tab <strong>Quan sát trực tiếp</strong>. Bạn chỉ cần đăng ký trước nếu muốn kiểm soát danh sách nhóm.
-          </div>
-          <div class="tg-add">
-            <div class="form-group">
-              <label>Tên Nhóm</label>
-              <input type="text" id="t-group-input" placeholder="VD: Nhóm 1" maxlength="30"/>
-            </div>
-            <button class="btn btn-primary" onclick="addTeacherGroup()">+ Thêm nhóm</button>
-            <button class="btn btn-ghost btn-sm" onclick="clearAllGroups()" style="color:var(--red);border-color:var(--red)">🗑️ Xóa tất cả</button>
-          </div>
-          <div class="sec-title" style="margin-top:1rem">Danh sách đã đăng ký</div>
-          <div style="overflow-x:auto">
-            <table class="group-table" id="teacher-table">
-              <thead>
-                <tr>
-                  <th>Nhóm</th>
-                  <th style="text-align:center">Đã chơi?</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="teacher-tbody">
-                <tr><td colspan="3" style="text-align:center;color:var(--mu);padding:2rem">Chưa có nhóm. Thêm ở trên ↑</td></tr>
-              </tbody>
-            </table>
-          </div>
+        <div style="overflow-x: auto">
+          <table class="group-table" id="teacher-table">
+            <thead>
+              <tr>
+                <th style="width: 130px">Nhóm</th>
+                <th style="text-align: center">
+                  C1<br /><small>Thu nhận</small>
+                </th>
+                <th style="text-align: center">
+                  C2<br /><small>Lưu trữ</small>
+                </th>
+                <th style="text-align: center">C3<br /><small>Xử lý</small></th>
+                <th style="text-align: center">
+                  C4<br /><small>Truyền tin</small>
+                </th>
+                <th style="text-align: center">Thưởng</th>
+                <th style="text-align: center; color: var(--g1)">Tổng</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="teacher-tbody">
+              <tr>
+                <td
+                  colspan="8"
+                  style="text-align: center; color: var(--mu); padding: 2rem"
+                >
+                  Chưa có nhóm nào. Thêm nhóm ở trên ↑
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </div>
-
-      <!-- TAB: GUIDE -->
-      <div id="tab-panel-guide" class="tab-panel" style="display:none">
-        <div class="wrap-wide">
 
         <div class="sec-title" style="margin-top: 2rem">
           Lịch trình GV — Gợi ý theo từng phút
@@ -2822,36 +2710,105 @@
           Gợi ý xử lý Lỗi sai phổ biến
         </div>
         <div class="info-card" style="padding: 0; overflow: hidden">
-          <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem">
+          <table
+            style="width: 100%; border-collapse: collapse; font-size: 0.8rem"
+          >
             <thead>
               <tr style="background: var(--bg)">
-                <th style="padding: 0.5rem 0.75rem; border-bottom: 1.5px solid var(--border)">Lỗi</th>
-                <th style="padding: 0.5rem 0.75rem; border-bottom: 1.5px solid var(--border)">Gợi ý (không cho đáp án)</th>
+                <th
+                  style="
+                    padding: 0.5rem 0.75rem;
+                    border-bottom: 1.5px solid var(--border);
+                  "
+                >
+                  Lỗi
+                </th>
+                <th
+                  style="
+                    padding: 0.5rem 0.75rem;
+                    border-bottom: 1.5px solid var(--border);
+                  "
+                >
+                  Gợi ý (không cho đáp án)
+                </th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style="padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border)"><span style="color: var(--red); font-weight: 600">C1:</span> Phân loại theo hình thức</td>
-                <td style="padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); color: var(--g2)">"GPS đó giúp em quyết định gì ngay lúc này không?"</td>
+                <td
+                  style="
+                    padding: 0.5rem 0.75rem;
+                    border-bottom: 1px solid var(--border);
+                  "
+                >
+                  <span style="color: var(--red); font-weight: 600">C1:</span>
+                  Phân loại theo hình thức
+                </td>
+                <td
+                  style="
+                    padding: 0.5rem 0.75rem;
+                    border-bottom: 1px solid var(--border);
+                    color: var(--g2);
+                  "
+                >
+                  "GPS đó giúp em quyết định gì ngay lúc này không?"
+                </td>
               </tr>
               <tr style="background: #fafffe">
-                <td style="padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border)"><span style="color: var(--red); font-weight: 600">C2:</span> Nhân thay vì chia lên đơn vị lớn</td>
-                <td style="padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); color: var(--g2)">"KB hay MB lớn hơn? Phép nào tạo ra số nhỏ hơn?"</td>
+                <td
+                  style="
+                    padding: 0.5rem 0.75rem;
+                    border-bottom: 1px solid var(--border);
+                  "
+                >
+                  <span style="color: var(--red); font-weight: 600">C2:</span>
+                  Nhân thay vì chia lên đơn vị lớn
+                </td>
+                <td
+                  style="
+                    padding: 0.5rem 0.75rem;
+                    border-bottom: 1px solid var(--border);
+                    color: var(--g2);
+                  "
+                >
+                  "KB hay MB lớn hơn? Phép nào tạo ra số nhỏ hơn?"
+                </td>
               </tr>
               <tr>
-                <td style="padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border)"><span style="color: var(--red); font-weight: 600">C3:</span> Bỏ qua thẻ mâu thuẫn</td>
-                <td style="padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); color: var(--g2)">"Trong hệ thống thực, thông tin nghi ngờ không bị xóa mà được đánh dấu!"</td>
+                <td
+                  style="
+                    padding: 0.5rem 0.75rem;
+                    border-bottom: 1px solid var(--border);
+                  "
+                >
+                  <span style="color: var(--red); font-weight: 600">C3:</span>
+                  Bỏ qua thẻ mâu thuẫn
+                </td>
+                <td
+                  style="
+                    padding: 0.5rem 0.75rem;
+                    border-bottom: 1px solid var(--border);
+                    color: var(--g2);
+                  "
+                >
+                  "Trong hệ thống thực, thông tin nghi ngờ không bị xóa mà được
+                  đánh dấu!"
+                </td>
               </tr>
               <tr style="background: #fafffe">
-                <td style="padding: 0.5rem 0.75rem"><span style="color: var(--red); font-weight: 600">C4:</span> Mã hóa sai thứ tự ký tự</td>
-                <td style="padding: 0.5rem 0.75rem; color: var(--g2)">"Đọc to từng ký tự trước khi mã hóa — 1 ký tự 1 bước."</td>
+                <td style="padding: 0.5rem 0.75rem">
+                  <span style="color: var(--red); font-weight: 600">C4:</span>
+                  Mã hóa sai thứ tự ký tự
+                </td>
+                <td style="padding: 0.5rem 0.75rem; color: var(--g2)">
+                  "Đọc to từng ký tự trước khi mã hóa — 1 ký tự 1 bước."
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
-      </div><!-- end tab-panel-guide -->
-    </div><!-- end tab-panel-guide wrap-wide -->
-    </div><!-- end s-teacher-dash -->
+      </div>
+    </div>
 
     <!-- ═══════════════════ LEADERBOARD ═══════════════════ -->
     <div id="s-leaderboard" class="screen">
@@ -2872,10 +2829,13 @@
       <div class="lb-controls">
         <button
           class="btn btn-ghost btn-sm"
-          style="color: rgba(255, 255, 255, 0.6); border-color: rgba(255, 255, 255, 0.2)"
+          style="
+            color: rgba(255, 255, 255, 0.6);
+            border-color: rgba(255, 255, 255, 0.2);
+          "
           onclick="showScreen('s-teacher-dash')"
         >
-          ← Về Dashboard
+          ← Quay lại
         </button>
         <button class="btn btn-teal btn-sm" onclick="refreshLeaderboard()">
           🔄 Làm mới
@@ -2933,55 +2893,7 @@
     </div>
 
     <script>
-
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  databaseURL: "YOUR_DATABASE_URL",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-
-// ── Khởi tạo Firebase an toàn: chỉ chạy nếu SDK đã load và config thật ──
-let db = null;
-const _firebaseReady = (
-  typeof firebase !== "undefined" &&
-  firebaseConfig.apiKey &&
-  firebaseConfig.apiKey !== "YOUR_API_KEY"
-);
-
-if (_firebaseReady) {
-  try {
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.database();
-    console.log("✅ Firebase đã kết nối.");
-  } catch(e) {
-    console.warn("Firebase init lỗi:", e);
-  }
-} else {
-  console.info("ℹ️ Firebase SDK chưa load hoặc chưa cấu hình → chạy offline (localStorage).");
-}
-
-let liveStudents = {};
-
-function startRealtimeMonitor() {
-  if (!db) {
-    console.info("ℹ️ Không có Firebase → bỏ qua realtime monitor.");
-    return;
-  }
-  try {
-    db.ref("students").on("value", (snapshot) => {
-      liveStudents = snapshot.val() || {};
-      if (typeof syncLiveData === "function") syncLiveData();
-    });
-  } catch(e) {
-    console.warn("Firebase realtime monitor lỗi:", e);
-  }
-}
-
-// ═══════════════════════════════════════════
+      // ═══════════════════════════════════════════
       //  GAME DATA
       // ═══════════════════════════════════════════
       const SIGNALS_DATA = [
@@ -3315,9 +3227,9 @@ function startRealtimeMonitor() {
         grid.innerHTML = SIGNALS_DATA.map(
           (s) => `
     <div class="signal-card" id="sc-${s.id}">
-      <div class="sc-icon">${s.icon}</div>
-      <div class="sc-label">${s.label}</div>
-      <div class="sc-content">${s.content}</div>
+      <div class="sig-icon">${s.icon}</div>
+      <div class="sig-label">${s.label}</div>
+      <div class="sig-content">${s.content}</div>
       <div class="signal-btns">
         <button class="sig-btn raw" onclick="classifySignal(${s.id},'raw')">📦 Dữ liệu thô</button>
         <button class="sig-btn info" onclick="classifySignal(${s.id},'info')">✅ Thông tin</button>
@@ -3819,7 +3731,6 @@ function startRealtimeMonitor() {
       //  TEACHER LOGIN
       // ═══════════════════════════════════════════
       const TEACHER_PIN = "2025";
-      let liveInterval = null;
 
       function pinNext(idx) {
         const val = document.getElementById("p" + idx).value;
@@ -3834,9 +3745,7 @@ function startRealtimeMonitor() {
           document.getElementById("pin-error").textContent = "";
           loadTeacherData();
           showScreen("s-teacher-dash");
-          switchTab("monitor");
-          syncLiveData();
-          startRealtimeMonitor();
+          renderTeacherTable();
         } else {
           document.getElementById("pin-error").textContent =
             "❌ Mã PIN không đúng. Thử lại!";
@@ -3848,181 +3757,44 @@ function startRealtimeMonitor() {
       }
 
       // ═══════════════════════════════════════════
-      //  TEACHER TABS
-      // ═══════════════════════════════════════════
-      function switchTab(name) {
-        ["monitor","setup","guide"].forEach(t => {
-          document.getElementById("tab-" + t).classList.toggle("active", t === name);
-          document.getElementById("tab-panel-" + t).style.display = t === name ? "block" : "none";
-        });
-        if (name === "monitor") syncLiveData();
-        if (name === "setup") renderTeacherTable();
-      }
-
-      // ═══════════════════════════════════════════
-      //  LIVE MONITORING — reads student localStorage data
-      // ═══════════════════════════════════════════
-      
-function getAllStudentData() {
-  return Object.values(liveStudents || {});
-}
-
-
-      function getStudentStageProgress(data) {
-        // Determine which stages have been attempted
-        const s = data.scores || {};
-        const stages = [
-          s.c1 !== undefined ? (s.c1 > 0 ? 'done' : 'partial') : 'waiting',
-          s.c2 !== undefined ? (s.c2 > 0 ? 'done' : 'partial') : 'waiting',
-          s.c3 !== undefined ? (s.c3 > 0 ? 'done' : 'partial') : 'waiting',
-          s.c4 !== undefined ? (s.c4 > 0 ? 'done' : 'partial') : 'waiting',
-        ];
-        // Better: if score exists and > 0, it's done. If complete flag, all done.
-        if (data.complete) return ['done','done','done','done'];
-        // Infer current stage from which scores are populated
-        let lastPlayed = -1;
-        ['c1','c2','c3','c4'].forEach((k,i) => { if (s[k] !== undefined) lastPlayed = i; });
-        return ['c1','c2','c3','c4'].map((k,i) => {
-          if (s[k] !== undefined && s[k] > 0) return 'done';
-          if (i === lastPlayed + 1) return 'partial'; // currently playing
-          return 'waiting';
-        });
-      }
-
-      function syncLiveData() {
-        const groups = getAllStudentData();
-        const tbody = document.getElementById("live-tbody");
-        const summaryRow = document.getElementById("live-summary-row");
-        const lastUpdate = document.getElementById("live-last-update");
-        const liveBadge = document.getElementById("t-live-badge");
-
-        // Update timestamp
-        const now = new Date();
-        lastUpdate.textContent = "Cập nhật lúc " + now.toLocaleTimeString("vi-VN");
-
-        // Summary cards
-        const total = groups.length;
-        const done = groups.filter(g => g.complete).length;
-        const playing = total - done;
-        const avgScore = total ? Math.round(groups.reduce((s, g) => {
-          return s + (g.scores?.c1||0)+(g.scores?.c2||0)+(g.scores?.c3||0)+(g.scores?.c4||0)+(g.bonus||0);
-        }, 0) / total) : 0;
-
-        summaryRow.innerHTML = `
-          <div class="live-score-card"><div class="lsc-val">${total}</div><div class="lsc-label">Nhóm đang chơi</div></div>
-          <div class="live-score-card" style="border-color:#6ee7b7"><div class="lsc-val" style="color:var(--g3)">${done}</div><div class="lsc-label">Hoàn thành</div></div>
-          <div class="live-score-card" style="border-color:#bfdbfe"><div class="lsc-val" style="color:var(--c1)">${playing}</div><div class="lsc-label">Đang chơi</div></div>
-          <div class="live-score-card" style="border-color:#fde68a"><div class="lsc-val" style="color:var(--c3d)">${avgScore}</div><div class="lsc-label">Điểm TB</div></div>
-        `;
-
-        // Live badge
-        if (playing > 0) {
-          liveBadge.style.display = "";
-        }
-
-        // Group count
-        document.getElementById("t-group-count").textContent = total + " nhóm";
-
-        if (!groups.length) {
-          tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--mu);padding:3rem;font-size:.9rem">Chờ học sinh tham gia...<br><span style="font-size:.78rem;opacity:.7">Dữ liệu hiện tự động khi các nhóm bắt đầu chơi</span></td></tr>';
-          return;
-        }
-
-        const medals = ["🥇","🥈","🥉"];
-        tbody.innerHTML = groups.map((g, i) => {
-          const s = g.scores || {};
-          const bonus = g.bonus || 0;
-          const total = (s.c1||0)+(s.c2||0)+(s.c3||0)+(s.c4||0)+bonus;
-          const pct = Math.round((total/100)*100);
-          const stageProg = getStudentStageProgress(g);
-          const segs = stageProg.map(st => `<div class="stage-prog-seg ${st}"></div>`).join("");
-          const rankBadge = i < 3 ? `<span style="font-size:1.1rem">${medals[i]}</span>` : `<span style="font-size:.8rem;color:var(--mu);font-weight:700">${i+1}</span>`;
-
-          let statusHtml;
-          if (g.complete) {
-            statusHtml = '<span class="status-pill status-done">✅ Hoàn thành</span>';
-          } else if (total > 0) {
-            statusHtml = '<span class="status-pill status-playing">▶ Đang chơi</span>';
-          } else {
-            statusHtml = '<span class="status-pill status-waiting">⏳ Chờ</span>';
-          }
-
-          const rowBg = i === 0 ? 'background:linear-gradient(90deg,#f0fdf4,#fff)' :
-                        i === 1 ? 'background:linear-gradient(90deg,#f8fafc,#fff)' :
-                        i === 2 ? 'background:linear-gradient(90deg,#fff8f0,#fff)' : '';
-
-          return `<tr style="${rowBg}">
-            <td style="text-align:center">${rankBadge}</td>
-            <td>
-              <div style="font-weight:800;font-size:.9rem">${g.name}</div>
-              <div class="stage-prog-bar">${segs}</div>
-              <div style="font-size:.68rem;color:var(--mu);margin-top:2px">C1·C2·C3·C4</div>
-            </td>
-            <td style="text-align:center;font-family:'Exo 2',sans-serif;font-weight:800;color:var(--c1d)">${s.c1 !== undefined ? s.c1 : '–'}</td>
-            <td style="text-align:center;font-family:'Exo 2',sans-serif;font-weight:800;color:var(--g1)">${s.c2 !== undefined ? s.c2 : '–'}</td>
-            <td style="text-align:center;font-family:'Exo 2',sans-serif;font-weight:800;color:var(--c3d)">${s.c3 !== undefined ? s.c3 : '–'}</td>
-            <td style="text-align:center;font-family:'Exo 2',sans-serif;font-weight:800;color:var(--c4d)">${s.c4 !== undefined ? s.c4 : '–'}</td>
-            <td style="text-align:center;font-weight:700;color:var(--teal)">${bonus > 0 ? '+'+bonus : bonus}</td>
-            <td style="text-align:center">
-              <div style="font-family:'Exo 2',sans-serif;font-weight:900;font-size:1.2rem;color:var(--g1)">${total}</div>
-              <div class="progress-mini" style="width:70px;margin:3px auto 0"><div class="progress-mini-fill" style="width:${pct}%"></div></div>
-            </td>
-            <td style="text-align:center">${statusHtml}</td>
-          </tr>`;
-        }).join("");
-      }
-
-      function startLivePolling() {
-        if (liveInterval) clearInterval(liveInterval);
-        liveInterval = setInterval(() => {
-          if (document.getElementById("s-teacher-dash").classList.contains("active")) {
-            syncLiveData();
-          }
-        }, 5000);
-      }
-
-      function clearAllStudentData() {
-        if (!confirm("Xóa toàn bộ dữ liệu học sinh? Hành động này không thể hoàn tác!")) return;
-        // Xóa localStorage
-        const keysToDelete = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && key.startsWith("gmtx_progress_")) keysToDelete.push(key);
-        }
-        keysToDelete.forEach(k => localStorage.removeItem(k));
-        // Xóa Firebase Realtime Database
-        try { db.ref("students").remove(); } catch(e) {}
-        liveStudents = {};
-        syncLiveData();
-        showToast("Đã xóa toàn bộ dữ liệu học sinh", "success");
-      }
-
-      function revealLeaderboard() {
-        refreshLeaderboard();
-        showScreen("s-leaderboard");
-      }
-
-      // ═══════════════════════════════════════════
-      //  TEACHER SETUP (pre-register groups — optional)
+      //  TEACHER DASHBOARD
       // ═══════════════════════════════════════════
       function loadTeacherData() {
         try {
-          teacherGroups = JSON.parse(localStorage.getItem("gmtx_teacher_groups") || "[]");
+          teacherGroups = JSON.parse(
+            localStorage.getItem("gmtx_teacher_groups") || "[]",
+          );
         } catch (e) {
           teacherGroups = [];
         }
       }
 
       function saveTeacherData() {
-        localStorage.setItem("gmtx_teacher_groups", JSON.stringify(teacherGroups));
+        localStorage.setItem(
+          "gmtx_teacher_groups",
+          JSON.stringify(teacherGroups),
+        );
+        document.getElementById("t-group-count").textContent =
+          teacherGroups.length + " nhóm";
       }
 
       function addTeacherGroup() {
         const input = document.getElementById("t-group-input");
         const name = input.value.trim();
-        if (!name) { showToast("Nhập tên nhóm!", "error"); return; }
-        if (teacherGroups.find((g) => g.name === name)) { showToast("Nhóm này đã tồn tại!", "error"); return; }
-        teacherGroups.push({ name, scores: { c1: 0, c2: 0, c3: 0, c4: 0 }, bonus: 0, complete: false });
+        if (!name) {
+          showToast("Nhập tên nhóm!", "error");
+          return;
+        }
+        if (teacherGroups.find((g) => g.name === name)) {
+          showToast("Nhóm này đã tồn tại!", "error");
+          return;
+        }
+        teacherGroups.push({
+          name,
+          scores: { c1: 0, c2: 0, c3: 0, c4: 0 },
+          bonus: 0,
+          complete: false,
+        });
         input.value = "";
         saveTeacherData();
         renderTeacherTable();
@@ -4030,7 +3802,7 @@ function getAllStudentData() {
       }
 
       function clearAllGroups() {
-        if (!confirm("Xóa tất cả nhóm đã đăng ký?")) return;
+        if (!confirm("Xóa tất cả nhóm?")) return;
         teacherGroups = [];
         saveTeacherData();
         renderTeacherTable();
@@ -4038,21 +3810,44 @@ function getAllStudentData() {
 
       function renderTeacherTable() {
         const tbody = document.getElementById("teacher-tbody");
-        document.getElementById("t-group-count").textContent = teacherGroups.length + " nhóm";
+        document.getElementById("t-group-count").textContent =
+          teacherGroups.length + " nhóm";
         if (!teacherGroups.length) {
-          tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--mu);padding:2rem">Chưa có nhóm. Thêm ở trên ↑</td></tr>';
+          tbody.innerHTML =
+            '<tr><td colspan="8" style="text-align:center;color:var(--mu);padding:2rem">Chưa có nhóm nào. Thêm nhóm ở trên ↑</td></tr>';
           return;
         }
-        // Cross-check with live student data
-        const liveGroups = getAllStudentData().map(g => g.groupName);
-        tbody.innerHTML = teacherGroups.map((g, idx) => {
-          const hasLive = liveGroups.includes(g.name);
-          return `<tr>
-            <td style="font-weight:700">${g.name}</td>
-            <td style="text-align:center">${hasLive ? '<span class="status-pill status-done">✅ Đã tham gia</span>' : '<span class="status-pill status-waiting">⏳ Chưa</span>'}</td>
-            <td><button class="btn btn-red btn-sm" onclick="removeGroup(${idx})">✕</button></td>
-          </tr>`;
-        }).join("");
+        tbody.innerHTML = teacherGroups
+          .map((g, idx) => {
+            const total =
+              g.scores.c1 + g.scores.c2 + g.scores.c3 + g.scores.c4 + g.bonus;
+            const pct = Math.round((total / 100) * 100);
+            return `<tr>
+      <td>
+        <div style="font-weight:700;font-size:.9rem">${g.name}</div>
+        <div class="progress-mini" style="margin-top:4px"><div class="progress-mini-fill" style="width:${pct}%"></div></div>
+        ${g.complete ? '<span style="font-size:.7rem;color:var(--g3);font-weight:700">✅ Hoàn thành</span>' : ""}
+      </td>
+      <td style="text-align:center"><input class="score-input-sm" type="number" min="0" max="25" value="${g.scores.c1}" onchange="updateScore(${idx},'c1',this.value)" placeholder="0"></td>
+      <td style="text-align:center"><input class="score-input-sm" type="number" min="0" max="25" value="${g.scores.c2}" onchange="updateScore(${idx},'c2',this.value)" placeholder="0"></td>
+      <td style="text-align:center"><input class="score-input-sm" type="number" min="0" max="25" value="${g.scores.c3}" onchange="updateScore(${idx},'c3',this.value)" placeholder="0"></td>
+      <td style="text-align:center"><input class="score-input-sm" type="number" min="0" max="25" value="${g.scores.c4}" onchange="updateScore(${idx},'c4',this.value)" placeholder="0"></td>
+      <td style="text-align:center">
+        <input class="score-input-sm" type="number" min="-10" max="10" value="${g.bonus}" onchange="updateScore(${idx},'bonus',this.value)" placeholder="0">
+      </td>
+      <td style="text-align:center" class="total-score-cell">${total}</td>
+      <td><button class="btn btn-red btn-sm" onclick="removeGroup(${idx})">✕</button></td>
+    </tr>`;
+          })
+          .join("");
+      }
+
+      function updateScore(idx, field, val) {
+        const v = parseInt(val) || 0;
+        if (field === "bonus") teacherGroups[idx].bonus = v;
+        else teacherGroups[idx].scores[field] = Math.min(25, Math.max(0, v));
+        saveTeacherData();
+        renderTeacherTable();
       }
 
       function removeGroup(idx) {
@@ -4065,40 +3860,29 @@ function getAllStudentData() {
       //  STUDENT PROGRESS SAVE
       // ═══════════════════════════════════════════
       function saveStudentProgress(complete = false, finalTotal = 0) {
-        const bonusCalc = state.hintsUsed === 0 ? 3 : -(state.hintsUsed * 3);
-        const data = {
-          name: state.groupName,           // dùng 'name' để syncLiveData đọc đúng
-          scores: { ...state.scores },
-          hintsUsed: state.hintsUsed,
-          bonus: complete ? bonusCalc : 0, // chỉ tính thưởng khi hoàn thành
-          complete,
-          finalTotal,
-          currentStage: state.currentStage,
-          timestamp: Date.now(),
-        };
-
-        // 1) Lưu localStorage (backup cục bộ)
         try {
+          const data = {
+            groupName: state.groupName,
+            scores: state.scores,
+            hintsUsed: state.hintsUsed,
+            complete,
+            finalTotal,
+            timestamp: Date.now(),
+          };
           localStorage.setItem(
             "gmtx_progress_" + slugify(state.groupName),
             JSON.stringify(data),
           );
+          // Also update teacher table if group exists
+          const existing = teacherGroups.find(
+            (g) => g.name === state.groupName,
+          );
+          if (existing) {
+            existing.scores = { ...state.scores };
+            existing.complete = complete;
+            saveTeacherData();
+          }
         } catch (e) {}
-
-        // 2) Đẩy lên Firebase Realtime Database (real-time cho GV)
-        try {
-          if (db) db.ref("students/" + slugify(state.groupName)).set(data);
-        } catch (e) {
-          console.warn("Firebase save failed:", e);
-        }
-
-        // 3) Cập nhật bảng GV đã đăng ký trước (nếu có)
-        const existing = teacherGroups.find((g) => g.name === state.groupName);
-        if (existing) {
-          existing.scores = { ...state.scores };
-          existing.complete = complete;
-          saveTeacherData();
-        }
       }
 
       function slugify(s) {
@@ -4115,13 +3899,12 @@ function getAllStudentData() {
       }
 
       function refreshLeaderboard() {
-        // Ưu tiên dữ liệu thực từ Firebase; fallback sang teacherGroups nếu chưa có Firebase
-        const allData = getAllStudentData();
-        const lbSource = allData.length ? allData : teacherGroups;
-
-        const sorted = [...lbSource].sort((a, b) => {
-          const s = x => (x.scores?.c1||0)+(x.scores?.c2||0)+(x.scores?.c3||0)+(x.scores?.c4||0)+(x.bonus||0);
-          return s(b) - s(a);
+        const sorted = [...teacherGroups].sort((a, b) => {
+          const ta =
+            a.scores.c1 + a.scores.c2 + a.scores.c3 + a.scores.c4 + a.bonus;
+          const tb =
+            b.scores.c1 + b.scores.c2 + b.scores.c3 + b.scores.c4 + b.bonus;
+          return tb - ta;
         });
 
         const medals = ["🥇", "🥈", "🥉"];
@@ -4131,31 +3914,36 @@ function getAllStudentData() {
         const list = document.getElementById("lb-list");
         if (!sorted.length) {
           list.innerHTML =
-            '<div style="text-align:center;color:rgba(255,255,255,.4);padding:3rem;font-size:1.1rem">Chưa có dữ liệu nhóm.<br>Chờ học sinh bắt đầu chơi...</div>';
+            '<div style="text-align:center;color:rgba(255,255,255,.4);padding:3rem;font-size:1.1rem">Chưa có dữ liệu nhóm.<br>Thêm nhóm trong bảng điều khiển giáo viên.</div>';
           return;
         }
 
         list.innerHTML = sorted
           .map((g, i) => {
-            const scores = g.scores || {};
-            const bonus = g.bonus || 0;
-            const total = (scores.c1||0)+(scores.c2||0)+(scores.c3||0)+(scores.c4||0)+bonus;
-            const groupName = g.name || g.groupName || "Nhóm ?";
+            const total =
+              g.scores.c1 + g.scores.c2 + g.scores.c3 + g.scores.c4 + g.bonus;
             const rankClass = i < 3 ? `rank-${i + 1}` : "";
-            const rankDisplay = i < 3
+            const rankDisplay =
+              i < 3
                 ? `<span class="lb-rank">${i + 1}</span>`
                 : `<span class="lb-rank other">${i + 1}</span>`;
-            const medal = i < 3
+            const medal =
+              i < 3
                 ? `<span class="lb-medal">${medals[i]}</span>`
                 : '<span class="lb-medal"></span>';
             const stagePills = stageNames
-              .map((s, si) => `<span class="lb-stage-pill ${s}">${stageLabels[si]}: ${scores[s] !== undefined ? scores[s] : '–'}</span>`)
+              .map(
+                (s, si) => `
+      <span class="lb-stage-pill ${s}">${stageLabels[si]}: ${g.scores[s]}</span>
+    `,
+              )
               .join("");
+            const totalClass = i < 3 ? "" : i + 1 + ' class="other-total"';
             return `<div class="lb-row ${rankClass}">
       ${rankDisplay}
       ${medal}
-      <div class="lb-name">${groupName}${g.complete ? '<span style="font-size:.7rem;color:var(--teal);margin-left:.5rem;font-weight:600">✓ Done</span>' : ""}</div>
-      <div class="lb-stages">${stagePills}${bonus ? `<span class="lb-stage-pill" style="background:rgba(0,200,150,.15);color:#6EE7B7">${bonus > 0 ? '+' : ''}${bonus}</span>` : ""}</div>
+      <div class="lb-name">${g.name}${g.complete ? '<span style="font-size:.7rem;color:var(--teal);margin-left:.5rem;font-weight:600">✓ Done</span>' : ""}</div>
+      <div class="lb-stages">${stagePills}${g.bonus ? `<span class="lb-stage-pill" style="background:rgba(0,200,150,.15);color:#6EE7B7">+${g.bonus > 0 ? "+" : ""}${g.bonus}</span>` : ""}</div>
       <div class="lb-total ${i >= 3 ? "other-total" : ""}">${total}</div>
     </div>`;
           })
@@ -4227,21 +4015,10 @@ function getAllStudentData() {
     </script>
   
 <script>
-  let gameAudioCtx = null;
-
-  function getAudioCtx() {
-    if (!gameAudioCtx) {
-      try {
-        gameAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      } catch(e) { return null; }
-    }
-    return gameAudioCtx;
-  }
+  const gameAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
   function playTone(freq = 440, duration = 0.12, type = "sine", volume = 0.05) {
-    const ctx = getAudioCtx();
-    if (!ctx) return;
-    const gameAudioCtx = ctx;
+    if (!gameAudioCtx) return;
 
     const osc = gameAudioCtx.createOscillator();
     const gain = gameAudioCtx.createGain();
@@ -4292,4 +4069,13 @@ function getAllStudentData() {
 
 
 
-<!-- Stub script đã được xoá (code rỗng, không cần thiết) -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  window.c2MCAnswers = window.c2MCAnswers || {};
+  window.c2MCScore = window.c2MCScore || 0;
+
+  document.querySelectorAll(".mc-options").forEach((group, qIndex) => {
+    // ... (và tất cả phần bên trong)
+  });
+});
+</script>
