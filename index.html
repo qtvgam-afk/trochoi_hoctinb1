@@ -1,2710 +1,1232 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chiến dịch Thám tử Dữ liệu | Tin học 10</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      :root {
-        --bg: #080f20;
-        --bg2: #0d1a35;
-        --card: #0f2147;
-        --card2: #163068;
-        --amber: #f59e0b;
-        --amber2: #fbbf24;
-        --blue: #3b82f6;
-        --blue2: #60a5fa;
-        --green: #10b981;
-        --red: #ef4444;
-        --purple: #8b5cf6;
-        --text: #e2eeff;
-        --muted: #7899c0;
-        --border: rgba(245, 158, 11, 0.25);
-      }
-      body {
-        font-family: "Be Vietnam Pro", sans-serif;
-        background: var(--bg);
-        color: var(--text);
-        min-height: 100vh;
-        overflow-x: hidden;
-      }
-      body::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        background-image:
-          linear-gradient(rgba(59, 130, 246, 0.04) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(59, 130, 246, 0.04) 1px, transparent 1px);
-        background-size: 36px 36px;
-        pointer-events: none;
-        z-index: 0;
-      }
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Bàn Gỡ Rối – Tin 10</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0d14;--surf:#13161f;--surf2:#1c2030;--surf3:#232840;
+  --brd:#2a3050;--brd2:#3a4570;
+  --txt:#dde3ff;--txt2:#8892c0;--txt3:#4a5480;
+  --blue:#5b9cf6;--blue-bg:#0d1e3d;--blue-mid:#1e3a70;
+  --green:#3ecf8e;--green-bg:#0a2318;--green-mid:#1a4a30;
+  --amber:#f5a623;--amber-bg:#2a1800;--amber-mid:#4a2e00;
+  --red:#ff6060;--red-bg:#2a0a0a;--red-mid:#500f0f;
+  --purple:#a07df0;--purple-bg:#1a1040;--purple-mid:#2d1a60;
+  --teal:#30d5c8;--teal-bg:#0a2826;
+  --r:10px;--rsm:6px;--rbig:16px;
+  --font:'Segoe UI',system-ui,sans-serif;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:100vh}
+.page{display:none;min-height:100vh;flex-direction:column}
+.page.on{display:flex}
 
-      /* ── SCREENS ── */
-      .screen {
-        display: none;
-        min-height: 100vh;
-        position: relative;
-        z-index: 1;
-      }
-      .screen.active {
-        display: block;
-      }
+/* ─── NAV ─── */
+.nav{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:52px;background:var(--surf);border-bottom:1px solid var(--brd);position:sticky;top:0;z-index:50;flex-shrink:0}
+.nav-brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px}
+.nav-brand i{color:var(--blue);font-size:20px}
+.nav-right{display:flex;gap:8px;align-items:center}
+.pill{padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.pill-blue{background:var(--blue-bg);color:var(--blue)}
+.pill-green{background:var(--green-bg);color:var(--green)}
+.pill-amber{background:var(--amber-bg);color:var(--amber)}
 
-      /* ── INTRO ── */
-      #s0 {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 32px 20px;
-        text-align: center;
-      }
-      #s0.active {
-        display: flex;
-      }
-      .badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: rgba(245, 158, 11, 0.12);
-        border: 1px solid var(--amber);
-        border-radius: 20px;
-        padding: 5px 14px;
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--amber);
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        margin-bottom: 20px;
-      }
-      .gtitle {
-        font-size: clamp(26px, 5vw, 46px);
-        font-weight: 900;
-        line-height: 1.1;
-        margin-bottom: 6px;
-      }
-      .gtitle em {
-        font-style: normal;
-        color: var(--amber);
-      }
-      .gsub {
-        color: var(--muted);
-        font-size: 15px;
-        margin-bottom: 32px;
-      }
-      .setup-card {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 28px 32px;
-        width: 100%;
-        max-width: 480px;
-      }
-      .setup-card h3 {
-        font-size: 16px;
-        font-weight: 800;
-        color: var(--amber2);
-        margin-bottom: 20px;
-        text-align: left;
-      }
-      .fg {
-        margin-bottom: 14px;
-        text-align: left;
-      }
-      .fg label {
-        display: block;
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--muted);
-        margin-bottom: 5px;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-      }
-      .fg input,
-      .fg select {
-        width: 100%;
-        background: var(--bg2);
-        border: 1px solid rgba(59, 130, 246, 0.25);
-        border-radius: 8px;
-        padding: 10px 13px;
-        color: var(--text);
-        font-family: inherit;
-        font-size: 14px;
-        outline: none;
-        transition: border-color 0.2s;
-      }
-      .fg input:focus,
-      .fg select:focus {
-        border-color: var(--amber);
-      }
-      .fg select option {
-        background: var(--bg2);
-      }
-      .btn-start {
-        width: 100%;
-        background: var(--amber);
-        color: var(--bg);
-        border: none;
-        border-radius: 10px;
-        padding: 13px;
-        font-family: inherit;
-        font-size: 15px;
-        font-weight: 900;
-        cursor: pointer;
-        margin-top: 6px;
-        transition: all 0.2s;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-      }
-      .btn-start:hover {
-        background: var(--amber2);
-        transform: translateY(-2px);
-        box-shadow: 0 10px 28px rgba(245, 158, 11, 0.4);
-      }
+/* ─── BUTTONS ─── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border-radius:var(--rsm);border:none;cursor:pointer;font-size:14px;font-weight:600;font-family:var(--font);transition:all .15s;white-space:nowrap}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:#4a8be5;transform:translateY(-1px)}
+.btn-ghost{background:transparent;border:1px solid var(--brd);color:var(--txt2)}
+.btn-ghost:hover{border-color:var(--blue);color:var(--blue)}
+.btn-sm{padding:6px 14px;font-size:13px}
+.btn-danger{background:var(--red-mid);color:var(--red)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
 
-      /* ── CHALLENGE LAYOUT ── */
-      .chdr {
-        background: var(--card);
-        border-bottom: 1px solid var(--border);
-        padding: 10px 20px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        position: sticky;
-        top: 0;
-        z-index: 20;
-        gap: 12px;
-      }
-      .chdr-l {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-      }
-      .cbadge {
-        background: var(--amber);
-        color: var(--bg);
-        font-weight: 900;
-        font-size: 11px;
-        padding: 3px 10px;
-        border-radius: 5px;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        white-space: nowrap;
-      }
-      .cname {
-        font-size: 14px;
-        font-weight: 700;
-        color: var(--text);
-      }
-      .gtag {
-        background: rgba(59, 130, 246, 0.18);
-        border: 1px solid rgba(59, 130, 246, 0.35);
-        color: var(--blue2);
-        font-size: 12px;
-        font-weight: 700;
-        padding: 3px 12px;
-        border-radius: 20px;
-        white-space: nowrap;
-      }
-      .timer {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        background: var(--bg);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 5px 12px;
-        font-size: 17px;
-        font-weight: 900;
-        font-variant-numeric: tabular-nums;
-        color: var(--amber);
-        flex-shrink: 0;
-      }
-      .timer.warn {
-        color: var(--red);
-        border-color: var(--red);
-        animation: pulse 0.8s infinite;
-      }
-      @keyframes pulse {
-        0%,
-        100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.5;
-        }
-      }
+/* ─── INPUTS ─── */
+input,select,textarea{background:var(--surf2);border:1px solid var(--brd);border-radius:var(--rsm);padding:9px 12px;color:var(--txt);font-size:14px;font-family:var(--font);outline:none;width:100%;transition:border-color .15s}
+input:focus,select:focus{border-color:var(--blue)}
 
-      .cbody {
-        padding: 20px;
-        max-width: 960px;
-        margin: 0 auto;
-      }
+/* ─── CARDS ─── */
+.card{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);padding:16px}
+.card-lg{padding:24px}
 
-      /* Mission card */
-      .mission {
-        background: linear-gradient(
-          135deg,
-          rgba(245, 158, 11, 0.12),
-          rgba(59, 130, 246, 0.08)
-        );
-        border: 1px solid var(--amber);
-        border-radius: 12px;
-        padding: 16px 20px;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: flex-start;
-        gap: 14px;
-      }
-      .mission-ico {
-        font-size: 28px;
-        flex-shrink: 0;
-        margin-top: 2px;
-      }
-      .mission h2 {
-        font-size: 18px;
-        font-weight: 800;
-        color: var(--amber2);
-        margin-bottom: 3px;
-      }
-      .mission p {
-        font-size: 13px;
-        color: var(--muted);
-        line-height: 1.6;
-      }
+/* ─── ALERT ─── */
+.alert{padding:10px 14px;border-radius:var(--rsm);font-size:13px;line-height:1.5}
+.alert-info{background:var(--blue-bg);border:1px solid var(--blue-mid);color:var(--blue)}
+.alert-success{background:var(--green-bg);border:1px solid var(--green-mid);color:var(--green)}
+.alert-warn{background:var(--amber-bg);border:1px solid var(--amber-mid);color:var(--amber)}
+.alert-err{background:var(--red-bg);border:1px solid var(--red-mid);color:var(--red)}
 
-      /* Two-column */
-      .cols {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-        margin-bottom: 20px;
-      }
-      @media (max-width: 680px) {
-        .cols {
-          grid-template-columns: 1fr;
-        }
-      }
+/* ─── PROGRESS BAR ─── */
+.prog-wrap{height:6px;background:var(--brd);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;transition:width .4s}
 
-      .panel {
-        background: var(--card);
-        border-radius: 12px;
-        padding: 18px;
-      }
-      .panel.blue-border {
-        border: 1px solid rgba(59, 130, 246, 0.3);
-      }
-      .panel.amber-border {
-        border: 1px solid rgba(245, 158, 11, 0.25);
-      }
-      .plabel {
-        font-size: 10px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: var(--muted);
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .plabel::after {
-        content: "";
-        flex: 1;
-        height: 1px;
-        background: rgba(120, 153, 192, 0.2);
-      }
+/* ─── SCORE RING ─── */
+.score-ring{display:inline-flex;flex-direction:column;align-items:center;justify-content:center}
 
-      /* Raw data chips */
-      .chips {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-bottom: 14px;
-      }
-      .chip {
-        background: var(--bg2);
-        border: 1px solid rgba(59, 130, 246, 0.35);
-        border-radius: 8px;
-        padding: 8px 14px;
-        font-size: 19px;
-        font-weight: 900;
-        color: var(--blue2);
-        font-variant-numeric: tabular-nums;
-        animation: flt 3s ease-in-out infinite;
-      }
-      .chip:nth-child(2n) {
-        animation-delay: 0.6s;
-      }
-      .chip:nth-child(3n) {
-        animation-delay: 1.2s;
-      }
-      .chip:nth-child(4n) {
-        animation-delay: 1.8s;
-      }
-      @keyframes flt {
-        0%,
-        100% {
-          transform: translateY(0);
-        }
-        50% {
-          transform: translateY(-5px);
-        }
-      }
-      .confused {
-        text-align: center;
-        color: var(--muted);
-        font-size: 12px;
-        font-style: italic;
-        padding: 10px;
-        border: 1px dashed rgba(120, 153, 192, 0.25);
-        border-radius: 8px;
-        margin-top: 4px;
-      }
+/* ─── TOAST ─── */
+#toasts{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.toast{background:var(--surf);border:1px solid var(--brd);border-radius:var(--rsm);padding:10px 16px;font-size:13px;display:flex;align-items:center;gap:8px;max-width:280px;pointer-events:auto;animation:tin .3s}
+.toast.ok{border-color:var(--green-mid);background:var(--green-bg);color:var(--green)}
+.toast.bad{border-color:var(--red-mid);background:var(--red-bg);color:var(--red)}
+.toast.tip{border-color:var(--blue-mid);background:var(--blue-bg);color:var(--blue)}
+.toast.pts{border-color:var(--amber-mid);background:var(--amber-bg);color:var(--amber)}
+@keyframes tin{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
 
-      /* Clues */
-      .clue-wrap {
-        margin-bottom: 18px;
-      }
-      .clue-btn {
-        width: 100%;
-        background: var(--card);
-        border: 1px solid rgba(245, 158, 11, 0.3);
-        border-radius: 10px;
-        padding: 12px 16px;
-        margin-bottom: 8px;
-        cursor: pointer;
-        font-family: inherit;
-        color: var(--text);
-        text-align: left;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        transition: all 0.2s;
-      }
-      .clue-btn:hover:not([disabled]) {
-        border-color: var(--amber);
-        background: var(--card2);
-      }
-      .clue-btn[disabled] {
-        cursor: not-allowed;
-        opacity: 0.35;
-      }
-      .cnum {
-        width: 26px;
-        height: 26px;
-        border-radius: 50%;
-        background: rgba(245, 158, 11, 0.15);
-        border: 1px solid var(--amber);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 12px;
-        font-weight: 900;
-        color: var(--amber);
-        flex-shrink: 0;
-      }
-      .clbl {
-        font-size: 13px;
-        font-weight: 700;
-        flex: 1;
-      }
-      .carr {
-        margin-left: auto;
-        color: var(--amber);
-        font-size: 16px;
-      }
-      .clue-reveal {
-        display: none;
-        background: rgba(16, 185, 129, 0.08);
-        border: 1px solid rgba(16, 185, 129, 0.35);
-        border-radius: 10px;
-        padding: 12px 16px;
-        margin-bottom: 8px;
-        animation: rin 0.4s ease;
-      }
-      .clue-reveal.on {
-        display: block;
-      }
-      @keyframes rin {
-        from {
-          opacity: 0;
-          transform: translateY(-8px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      .rh {
-        font-size: 10px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: #34d399;
-        margin-bottom: 6px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .rc {
-        font-size: 14px;
-        font-weight: 600;
-        color: var(--text);
-        line-height: 1.55;
-      }
+/* ─── FLIP CARD 3D ─── */
+.fc-wrap{perspective:600px;cursor:pointer}
+.fc{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .45s}
+.fc.flipped{transform:rotateY(180deg)}
+.fc-front,.fc-back{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--rsm);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;text-align:center}
+.fc-back{transform:rotateY(180deg)}
 
-      /* Answer */
-      .ans-panel {
-        display: none;
-        background: linear-gradient(
-          135deg,
-          rgba(16, 185, 129, 0.12),
-          rgba(59, 130, 246, 0.08)
-        );
-        border: 2px solid var(--green);
-        border-radius: 14px;
-        padding: 20px;
-        margin-bottom: 20px;
-        animation: rin 0.5s ease;
-      }
-      .ans-panel.on {
-        display: block;
-      }
-      .ans-h {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 17px;
-        font-weight: 900;
-        color: #34d399;
-        margin-bottom: 10px;
-      }
-      .ans-txt {
-        font-size: 15px;
-        line-height: 1.75;
-        margin-bottom: 14px;
-      }
-      .principle {
-        background: rgba(245, 158, 11, 0.12);
-        border-left: 3px solid var(--amber);
-        border-radius: 0 8px 8px 0;
-        padding: 10px 14px;
-        font-size: 13px;
-        color: var(--amber2);
-        font-style: italic;
-      }
-      .principle strong {
-        display: block;
-        font-style: normal;
-        font-weight: 800;
-        text-transform: uppercase;
-        font-size: 10px;
-        letter-spacing: 0.06em;
-        margin-bottom: 3px;
-      }
+/* ─── STAGE BADGES ─── */
+.stage-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.stage-dot.done{background:var(--green)}
+.stage-dot.active{background:var(--blue)}
+.stage-dot.todo{background:var(--brd2)}
 
-      /* Worksheet reminder */
-      .remind {
-        background: rgba(59, 130, 246, 0.1);
-        border: 1px solid rgba(59, 130, 246, 0.25);
-        border-radius: 10px;
-        padding: 12px 16px;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 13px;
-        color: var(--blue2);
-      }
+/* ────────────────────────────────
+   PAGE 1 · HOME (role select)
+──────────────────────────────── */
+#p-home{align-items:center;justify-content:center;padding:40px 20px;gap:32px;text-align:center}
+.home-title{font-size:44px;font-weight:800;letter-spacing:-1.5px;line-height:1.1}
+.home-title em{color:var(--blue);font-style:normal}
+.home-subtitle{font-size:15px;color:var(--txt2);max-width:480px;line-height:1.7}
+.role-grid{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.role-card{background:var(--surf);border:1.5px solid var(--brd);border-radius:var(--rbig);padding:28px 32px;cursor:pointer;transition:all .2s;min-width:200px;text-align:left}
+.role-card:hover{border-color:var(--blue);background:var(--blue-bg)}
+.role-card i{font-size:32px;color:var(--blue);display:block;margin-bottom:12px}
+.role-card h3{font-size:16px;font-weight:700;margin-bottom:6px}
+.role-card p{font-size:13px;color:var(--txt2);line-height:1.5}
 
-      /* Nav */
-      .cnav {
-        display: flex;
-        justify-content: flex-end;
-        padding-bottom: 40px;
-      }
-      .btn-next {
-        background: var(--amber);
-        color: var(--bg);
-        border: none;
-        border-radius: 10px;
-        padding: 11px 26px;
-        font-family: inherit;
-        font-size: 14px;
-        font-weight: 900;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.2s;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        opacity: 0.3;
-        pointer-events: none;
-      }
-      .btn-next.on {
-        opacity: 1;
-        pointer-events: auto;
-      }
-      .btn-next.on:hover {
-        background: var(--amber2);
-        transform: translateX(3px);
-      }
+/* ────────────────────────────────
+   PAGE 2 · GROUP LOGIN
+──────────────────────────────── */
+#p-login{align-items:center;justify-content:center;padding:40px 20px}
+.login-box{background:var(--surf);border:1px solid var(--brd);border-radius:var(--rbig);padding:36px;max-width:440px;width:100%;display:flex;flex-direction:column;gap:20px}
+.login-box h2{font-size:22px;font-weight:700;text-align:center}
+.form-row{display:flex;flex-direction:column;gap:6px}
+.form-label{font-size:13px;color:var(--txt2);font-weight:500}
+.group-btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.group-pick-btn{padding:10px;border-radius:var(--rsm);border:1.5px solid var(--brd);background:var(--surf2);cursor:pointer;font-size:13px;font-weight:600;color:var(--txt2);transition:all .15s;font-family:var(--font)}
+.group-pick-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.group-pick-btn.chosen{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+.group-pick-btn.taken{opacity:.4;cursor:not-allowed}
 
-      /* ── SUMMARY ── */
-      #s4 {
-        padding: 36px 20px;
-      }
-      .sum-inner {
-        max-width: 860px;
-        margin: 0 auto;
-      }
-      .sum-hdr {
-        text-align: center;
-        margin-bottom: 36px;
-      }
-      .sum-hdr h1 {
-        font-size: 28px;
-        font-weight: 900;
-        margin-bottom: 6px;
-      }
-      .sum-hdr h1 span {
-        color: var(--green);
-      }
-      .sum-hdr p {
-        color: var(--muted);
-        font-size: 14px;
-      }
+/* ────────────────────────────────
+   PAGE 3 · GAME (student view)
+──────────────────────────────── */
+#p-game{flex-direction:column}
+.game-body{display:grid;grid-template-columns:1fr 300px;flex:1;overflow:hidden;min-height:0}
+.game-main{padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+.game-side{background:var(--surf);border-left:1px solid var(--brd);padding:14px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
 
-      .concept-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 14px;
-        margin-bottom: 28px;
-      }
-      .cc {
-        background: var(--card);
-        border-radius: 12px;
-        padding: 18px;
-        border-top: 3px solid;
-      }
-      .cc.d {
-        border-color: var(--blue);
-      }
-      .cc.c {
-        border-color: var(--amber);
-      }
-      .cc.i {
-        border-color: var(--green);
-      }
-      .cc-tag {
-        font-size: 10px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        margin-bottom: 6px;
-      }
-      .cc.d .cc-tag {
-        color: var(--blue2);
-      }
-      .cc.c .cc-tag {
-        color: var(--amber);
-      }
-      .cc.i .cc-tag {
-        color: #34d399;
-      }
-      .cc h4 {
-        font-size: 19px;
-        font-weight: 900;
-        margin-bottom: 6px;
-      }
-      .cc p {
-        font-size: 13px;
-        color: var(--muted);
-        line-height: 1.6;
-      }
+/* Stage header */
+.stage-header{background:var(--surf2);border:1px solid var(--brd);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;gap:12px}
+.stage-header .stage-icon{width:40px;height:40px;border-radius:var(--rsm);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.stage-icon.s1{background:var(--blue-bg);color:var(--blue)}
+.stage-icon.s2{background:var(--amber-bg);color:var(--amber)}
+.stage-icon.s3{background:var(--green-bg);color:var(--green)}
+.stage-icon.s4{background:var(--purple-bg);color:var(--purple)}
+.stage-meta h3{font-size:15px;font-weight:700}
+.stage-meta p{font-size:12px;color:var(--txt2);margin-top:2px;line-height:1.4}
 
-      .qa-card {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 22px;
-        margin-bottom: 20px;
-      }
-      .qa-card h3 {
-        font-size: 15px;
-        font-weight: 800;
-        color: var(--amber2);
-        margin-bottom: 16px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .qa-item {
-        margin-bottom: 14px;
-        padding-bottom: 14px;
-        border-bottom: 1px solid rgba(120, 153, 192, 0.12);
-      }
-      .qa-item:last-child {
-        border-bottom: none;
-        margin-bottom: 0;
-        padding-bottom: 0;
-      }
-      .qa-q {
-        font-size: 13px;
-        font-weight: 700;
-        margin-bottom: 7px;
-        display: flex;
-        gap: 8px;
-        line-height: 1.5;
-      }
-      .qa-q em {
-        color: var(--amber);
-        font-style: normal;
-        flex-shrink: 0;
-      }
-      .qa-hint {
-        font-size: 13px;
-        color: var(--muted);
-        line-height: 1.65;
-        background: var(--bg2);
-        border-radius: 8px;
-        padding: 10px 13px;
-        border-left: 2px solid var(--amber);
-      }
+/* Score display */
+.score-display{display:flex;gap:8px;flex-wrap:wrap}
+.sc-chip{background:var(--surf2);border:1px solid var(--brd);border-radius:var(--rsm);padding:7px 12px;display:flex;align-items:center;gap:6px;font-size:13px;flex:1;min-width:90px}
+.sc-chip i{font-size:15px}
+.sc-chip span{color:var(--txt2);font-size:11px;display:block}
+.sc-chip strong{font-size:16px;font-weight:700}
 
-      .done-card {
-        background: linear-gradient(
-          135deg,
-          rgba(16, 185, 129, 0.14),
-          rgba(59, 130, 246, 0.08)
-        );
-        border: 1px solid var(--green);
-        border-radius: 12px;
-        padding: 24px;
-        text-align: center;
-        margin-bottom: 40px;
-      }
-      .done-card h3 {
-        font-size: 20px;
-        font-weight: 900;
-        color: #34d399;
-        margin-bottom: 6px;
-      }
-      .done-card p {
-        color: var(--muted);
-        margin-bottom: 18px;
-        font-size: 14px;
-      }
-      .stars {
-        font-size: 36px;
-        margin-bottom: 14px;
-      }
-      .btn-re {
-        background: transparent;
-        border: 1px solid var(--green);
-        color: #34d399;
-        border-radius: 8px;
-        padding: 9px 22px;
-        font-family: inherit;
-        font-size: 13px;
-        font-weight: 800;
-        cursor: pointer;
-        transition: all 0.2s;
-      }
-      .btn-re:hover {
-        background: rgba(16, 185, 129, 0.1);
-      }
+/* Stage 1: Discovery cards */
+.disc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.disc-card{height:110px;border-radius:var(--rsm);cursor:pointer;user-select:none}
+.disc-card .fc-front{background:var(--surf2);border:1.5px solid var(--brd)}
+.disc-card .fc-front i{font-size:28px;color:var(--blue);margin-bottom:6px}
+.disc-card .fc-front span{font-size:11px;color:var(--txt3)}
+.disc-card .fc-back{border:1.5px solid}
+.fc-back.t-data{background:#0d1e3d;border-color:#1e3a70;color:#85b7eb}
+.fc-back.t-info{background:#0a2318;border-color:#1a4a30;color:#5dcaa5}
+.fc-back.t-context{background:#2a1800;border-color:#4a2e00;color:#f5a623}
+.fc-back.t-process{background:#1a1040;border-color:#2d1a60;color:#a07df0}
+.fc-back.t-wrong{background:#2a0a0a;border-color:#500f0f;color:#ff8080}
+.fc-back .back-type{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;opacity:.8}
+.fc-back .back-text{font-size:12px;line-height:1.4;font-weight:500}
+.disc-card.locked .fc-front{opacity:.5;cursor:not-allowed}
 
-      /* Progress bar */
-      .prog-bar {
-        height: 3px;
-        background: rgba(245, 158, 11, 0.15);
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 100;
-      }
-      .prog-fill {
-        height: 100%;
-        background: var(--amber);
-        transition: width 0.5s ease;
-        width: 0%;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="prog-bar"><div class="prog-fill" id="prog"></div></div>
+/* Stage 1: quiz below */
+.quiz-box{background:var(--surf2);border:1px solid var(--brd);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
+.quiz-q{font-size:14px;font-weight:600;line-height:1.5}
+.quiz-opts{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.quiz-opt{padding:9px 12px;border-radius:var(--rsm);border:1.5px solid var(--brd);background:var(--surf);cursor:pointer;font-size:13px;line-height:1.4;text-align:left;font-family:var(--font);color:var(--txt);transition:all .15s}
+.quiz-opt:hover:not(:disabled){border-color:var(--blue);background:var(--blue-bg);color:var(--blue)}
+.quiz-opt.correct{border-color:var(--green);background:var(--green-bg);color:var(--green);cursor:default}
+.quiz-opt.wrong{border-color:var(--red);background:var(--red-bg);color:var(--red);cursor:default}
+.quiz-opt:disabled{cursor:default}
+.quiz-feedback{padding:10px 12px;border-radius:var(--rsm);font-size:13px;line-height:1.5}
 
-    <!-- ══════════════ SCREEN 0: INTRO ══════════════ -->
-    <div id="s0" class="screen active">
-      <div class="badge">⚡ Tin học 10 · Bài: Thông tin & Xử lý thông tin</div>
-      <h1 class="gtitle">Chiến dịch<br /><em>Thám tử Dữ liệu</em></h1>
-      <p class="gsub">3 thử thách · Giải mã · Khám phá · Kiến tạo tri thức</p>
+/* Stage 2: connection game */
+.conn-pool{display:flex;flex-wrap:wrap;gap:6px;padding:10px}
+.pool-tag{padding:7px 12px;border-radius:20px;border:1.5px solid var(--brd);background:var(--surf2);cursor:pointer;font-size:12px;font-weight:500;color:var(--txt2);transition:all .15s;user-select:none}
+.pool-tag:hover{border-color:var(--blue);color:var(--blue)}
+.pool-tag.sel-a{border-color:var(--amber);background:var(--amber-bg);color:var(--amber)}
+.pool-tag.sel-b{border-color:var(--purple);background:var(--purple-bg);color:var(--purple)}
+.pool-tag.used{opacity:.35;cursor:default;pointer-events:none}
+.conn-slot-row{display:flex;align-items:center;gap:8px;padding:10px 0}
+.conn-slot{flex:1;border:1.5px dashed var(--brd2);border-radius:var(--rsm);padding:8px;min-height:38px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--txt3)}
+.conn-slot.has-a{border-color:var(--amber);border-style:solid;background:var(--amber-bg);color:var(--amber);font-weight:600}
+.conn-slot.has-b{border-color:var(--purple);border-style:solid;background:var(--purple-bg);color:var(--purple);font-weight:600}
+.conn-arrow{color:var(--txt3);font-size:18px;flex-shrink:0}
+.rel-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px}
+.rel-btn{padding:7px 10px;border-radius:var(--rsm);border:1.5px solid var(--brd);background:var(--surf);cursor:pointer;font-size:12px;line-height:1.3;text-align:left;font-family:var(--font);color:var(--txt2);transition:all .15s}
+.rel-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.rel-btn.picked{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.conn-history{display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto}
+.conn-entry{display:flex;align-items:center;gap:6px;font-size:12px;padding:5px 8px;border-radius:var(--rsm)}
+.conn-entry.ok{background:var(--green-bg);color:var(--green)}
+.conn-entry.fail{background:var(--red-bg);color:var(--red)}
+.conn-entry i{flex-shrink:0;font-size:14px}
 
-      <!-- Detective SVG Illustration -->
-      <svg
-        class="detective-svg"
-        width="210"
-        height="230"
-        viewBox="0 0 210 230"
-        style="
-          margin: 0 auto 28px;
-          filter: drop-shadow(0 0 36px rgba(245, 158, 11, 0.35));
-        "
-      >
-        <defs>
-          <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="rgba(245,158,11,.3)" />
-            <stop offset="100%" stop-color="transparent" />
-          </radialGradient>
-        </defs>
-        <!-- Shadow -->
-        <ellipse cx="100" cy="218" rx="58" ry="9" fill="rgba(0,0,0,.4)" />
-        <!-- Coat body -->
-        <rect x="60" y="118" width="74" height="84" rx="10" fill="#1a3a6e" />
-        <!-- Coat darker center panel -->
-        <polygon points="97,126 103,126 110,195 90,195" fill="#0f2044" />
-        <!-- Lapels -->
-        <polygon points="97,126 68,118 72,162" fill="#0d1b3c" />
-        <polygon points="103,126 132,118 128,162" fill="#0d1b3c" />
-        <!-- Belt -->
-        <rect x="60" y="165" width="74" height="6" rx="3" fill="#0f2044" />
-        <rect x="94" y="163" width="12" height="10" rx="2" fill="#f59e0b" />
-        <!-- Legs -->
-        <rect x="68" y="196" width="22" height="22" rx="5" fill="#163068" />
-        <rect x="104" y="196" width="22" height="22" rx="5" fill="#163068" />
-        <!-- Shoes -->
-        <ellipse cx="79" cy="218" rx="14" ry="5" fill="#0a1628" />
-        <ellipse cx="115" cy="218" rx="14" ry="5" fill="#0a1628" />
-        <!-- Neck -->
-        <rect x="88" y="106" width="18" height="16" rx="4" fill="#fcd34d" />
-        <!-- Head -->
-        <circle cx="97" cy="82" r="32" fill="#fcd34d" />
-        <!-- Ear -->
-        <ellipse cx="65" cy="84" rx="5" ry="8" fill="#f9bc34" />
-        <ellipse cx="129" cy="84" rx="5" ry="8" fill="#f9bc34" />
-        <!-- Hat brim -->
-        <rect x="54" y="58" width="86" height="9" rx="4.5" fill="#0d1b3c" />
-        <!-- Hat crown -->
-        <rect x="66" y="30" width="62" height="32" rx="10" fill="#0d1b3c" />
-        <!-- Hat band -->
-        <rect x="66" y="56" width="62" height="7" fill="#f59e0b" />
-        <!-- Eyes -->
-        <circle cx="86" cy="84" r="5" fill="white" />
-        <circle cx="108" cy="84" r="5" fill="white" />
-        <circle cx="87" cy="84" r="3" fill="#0d1b3c" />
-        <circle cx="109" cy="84" r="3" fill="#0d1b3c" />
-        <circle cx="88" cy="82.5" r="1.2" fill="white" />
-        <circle cx="110" cy="82.5" r="1.2" fill="white" />
-        <!-- Eyebrows (determined look) -->
-        <line
-          x1="81"
-          y1="77"
-          x2="91"
-          y2="79"
-          stroke="#8b6914"
-          stroke-width="2"
-          stroke-linecap="round"
-        />
-        <line
-          x1="103"
-          y1="79"
-          x2="113"
-          y2="77"
-          stroke="#8b6914"
-          stroke-width="2"
-          stroke-linecap="round"
-        />
-        <!-- Mouth -->
-        <path
-          d="M86 95 Q97 100 108 95"
-          stroke="#c49b1a"
-          stroke-width="2"
-          fill="none"
-          stroke-linecap="round"
-        />
-        <!-- Left arm -->
-        <line
-          x1="60"
-          y1="130"
-          x2="40"
-          y2="158"
-          stroke="#163068"
-          stroke-width="13"
-          stroke-linecap="round"
-        />
-        <!-- Right arm holding glass -->
-        <line
-          x1="134"
-          y1="130"
-          x2="158"
-          y2="162"
-          stroke="#163068"
-          stroke-width="13"
-          stroke-linecap="round"
-        />
-        <!-- Magnifying glass circle -->
-        <circle
-          cx="164"
-          cy="174"
-          r="24"
-          fill="none"
-          stroke="#f59e0b"
-          stroke-width="4"
-        />
-        <circle cx="164" cy="174" r="20" fill="rgba(59,130,246,.18)" />
-        <circle
-          cx="164"
-          cy="174"
-          r="20"
-          fill="none"
-          stroke="rgba(255,255,255,.08)"
-          stroke-width="8"
-        />
-        <!-- Magnifying glass shine -->
-        <path
-          d="M154 165 Q158 162 164 163"
-          stroke="rgba(255,255,255,.5)"
-          stroke-width="2"
-          fill="none"
-          stroke-linecap="round"
-        />
-        <!-- Handle -->
-        <line
-          x1="182"
-          y1="192"
-          x2="196"
-          y2="208"
-          stroke="#f59e0b"
-          stroke-width="6"
-          stroke-linecap="round"
-        />
-        <!-- Data symbols floating -->
-        <text
-          x="12"
-          y="48"
-          fill="rgba(59,130,246,.5)"
-          font-size="16"
-          font-weight="900"
-          font-family="monospace"
-        >
-          01
-        </text>
-        <text
-          x="168"
-          y="40"
-          fill="rgba(245,158,11,.45)"
-          font-size="14"
-          font-weight="900"
-        >
-          ?
-        </text>
-        <text x="22" y="140" fill="rgba(245,158,11,.3)" font-size="12">?</text>
-        <text
-          x="180"
-          y="110"
-          fill="rgba(59,130,246,.4)"
-          font-size="13"
-          font-family="monospace"
-        >
-          ∑
-        </text>
-      </svg>
+/* Stage 3: mindmap build */
+.mm-node-list{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.mm-node{padding:8px 10px;border-radius:var(--rsm);border:1.5px solid;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s}
+.mm-node.type-data{border-color:#1e3a70;background:#0d1e3d;color:#85b7eb}
+.mm-node.type-info{border-color:#1a4a30;background:#0a2318;color:#5dcaa5}
+.mm-node.type-context{border-color:#4a2e00;background:#2a1800;color:#f5a623}
+.mm-node.type-process{border-color:#2d1a60;background:#1a1040;color:#a07df0}
+.mm-node:hover{transform:translateY(-1px)}
+.mm-node.placed{opacity:.4;cursor:default;transform:none}
+.mm-canvas{background:var(--surf2);border:1px solid var(--brd);border-radius:var(--r);min-height:220px;position:relative;overflow:hidden}
+.mm-placed-node{position:absolute;padding:6px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:move;white-space:nowrap;border:1.5px solid}
+.mm-placed-node.type-data{background:#0d1e3d;border-color:#1e3a70;color:#85b7eb}
+.mm-placed-node.type-info{background:#0a2318;border-color:#1a4a30;color:#5dcaa5}
+.mm-placed-node.type-context{background:#2a1800;border-color:#4a2e00;color:#f5a623}
+.mm-placed-node.type-process{background:#1a1040;border-color:#2d1a60;color:#a07df0}
+#mm-svg{position:absolute;inset:0;pointer-events:none;width:100%;height:100%}
 
-      <div class="setup-card">
-        <h3>📋 Đăng ký Nhóm Thám tử</h3>
-        <div class="fg">
-          <label>Nhóm số</label>
-          <select id="grpNum">
-            <option value="">-- Chọn nhóm --</option>
-            <option>Nhóm 1</option>
-            <option>Nhóm 2</option>
-            <option>Nhóm 3</option>
-            <option>Nhóm 4</option>
-            <option>Nhóm 5</option>
-            <option>Nhóm 6</option>
-            <option>Nhóm 7</option>
-          </select>
-        </div>
-        <div class="fg">
-          <label>Thành viên 1 — Trưởng nhóm (Điều phối)</label>
-          <input id="m1" type="text" placeholder="Họ và tên..." />
-        </div>
-        <div class="fg">
-          <label>Thành viên 2 — Thư ký (Ghi nhận)</label>
-          <input id="m2" type="text" placeholder="Họ và tên..." />
-        </div>
-        <div class="fg">
-          <label>Thành viên 3 — Kỹ thuật (Thao tác)</label>
-          <input id="m3" type="text" placeholder="Họ và tên..." />
-        </div>
-        <button class="btn-start" onclick="startGame()">
-          🚀 Bắt đầu Chiến dịch
+/* Stage 4: final challenge */
+.fill-box{background:var(--surf2);border:1px solid var(--brd);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+.fill-sentence{font-size:14px;line-height:2;color:var(--txt)}
+.fill-blank{display:inline-block;border-bottom:2px solid var(--blue);min-width:120px;padding:2px 8px;background:var(--blue-bg);border-radius:4px 4px 0 0;color:var(--blue);font-weight:600;cursor:pointer;text-align:center}
+.blank-opts{display:flex;flex-wrap:wrap;gap:6px;padding:10px 0}
+.blank-chip{padding:5px 12px;border-radius:20px;border:1.5px solid var(--brd);background:var(--surf);cursor:pointer;font-size:13px;color:var(--txt2);transition:all .15s}
+.blank-chip:hover{border-color:var(--blue);color:var(--blue)}
+.blank-chip.used{opacity:.35;cursor:default;pointer-events:none}
+
+/* SIDEBAR */
+.side-title{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt3);font-weight:600;margin-bottom:6px}
+.stage-steps{display:flex;flex-direction:column;gap:8px}
+.stage-step{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--txt2)}
+.stage-step.done{color:var(--green)}
+.stage-step.active{color:var(--txt);font-weight:600}
+.mini-leaderboard{display:flex;flex-direction:column;gap:5px}
+.mlb-row{display:flex;align-items:center;gap:7px;padding:5px 6px;border-radius:var(--rsm);font-size:12px}
+.mlb-row.me{background:var(--blue-bg);border:1px solid var(--blue-mid)}
+.mlb-rank{width:18px;height:18px;border-radius:50%;background:var(--surf3);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--txt2)}
+.mlb-rank.g{background:#3d2800;color:var(--amber)}
+.mlb-rank.s{background:#1e2430;color:#90b4d8}
+.mlb-rank.b{background:#2a1500;color:#c07020}
+.mlb-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mlb-pts{font-weight:700;color:var(--blue)}
+
+/* ────────────────────────────────
+   PAGE 4 · TEACHER MONITOR
+──────────────────────────────── */
+#p-teacher{flex-direction:column}
+.teacher-body{display:grid;grid-template-columns:1fr 280px;flex:1;overflow:hidden;min-height:0}
+.teacher-main{padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+.teacher-side{background:var(--surf);border-left:1px solid var(--brd);padding:14px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.group-monitor-card{background:var(--surf2);border:1px solid var(--brd);border-radius:var(--r);padding:14px}
+.gmc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.gmc-name{font-size:14px;font-weight:700}
+.gmc-pts{font-size:20px;font-weight:800;color:var(--blue)}
+.gmc-stage{font-size:11px;color:var(--txt3);margin-top:1px}
+.gmc-progress{display:flex;gap:4px;margin:8px 0;align-items:center}
+.gmc-prog-seg{height:4px;flex:1;border-radius:2px}
+.gmc-prog-seg.done{background:var(--green)}
+.gmc-prog-seg.active{background:var(--blue)}
+.gmc-prog-seg.todo{background:var(--brd)}
+.gmc-stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.gmc-stat{font-size:11px;padding:3px 8px;border-radius:20px}
+.gmc-stat.ok{background:var(--green-bg);color:var(--green)}
+.gmc-stat.bad{background:var(--red-bg);color:var(--red)}
+.gmc-stat.info{background:var(--blue-bg);color:var(--blue)}
+.gmc-activity{font-size:11px;color:var(--txt3);margin-top:6px;font-style:italic}
+
+.phase-ctrl-card{background:var(--surf2);border:1px solid var(--brd);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
+.pcc-phase{font-size:14px;font-weight:700}
+.pcc-desc{font-size:12px;color:var(--txt2);line-height:1.5}
+
+.teacher-scoreboard{display:flex;flex-direction:column;gap:4px}
+.tsb-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--rsm);font-size:13px}
+.tsb-row.highlight{background:var(--blue-bg)}
+.tsb-bar-wrap{flex:1;height:4px;background:var(--brd);border-radius:2px;overflow:hidden}
+.tsb-bar-fill{height:100%;border-radius:2px;background:var(--blue);transition:width .5s}
+.tsb-pts{font-weight:700;color:var(--blue);min-width:36px;text-align:right}
+
+/* attention list */
+.att-item{font-size:12px;color:var(--txt2);padding:6px 8px;border-radius:var(--rsm);background:var(--red-bg);border:1px solid var(--red-mid);margin-bottom:4px}
+.att-item strong{color:var(--red)}
+
+/* ────────────────────────────────
+   PAGE 5 · RESULTS
+──────────────────────────────── */
+#p-results{align-items:center;padding:30px 20px;gap:20px;overflow-y:auto}
+.podium-wrap{display:flex;align-items:flex-end;gap:10px;justify-content:center}
+.pod-slot{display:flex;flex-direction:column;align-items:center;gap:6px}
+.pod-label{font-size:12px;font-weight:600;max-width:90px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pod-box{width:90px;border-radius:var(--rsm) var(--rsm) 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 0}
+.pod-box.p1{height:110px;background:#2e1e00;border:1.5px solid var(--amber);color:var(--amber)}
+.pod-box.p2{height:75px;background:#1a2030;border:1.5px solid var(--brd2);color:#90b4d8}
+.pod-box.p3{height:55px;background:#1e1a10;border:1.5px solid #4a3a10;color:#c07020}
+.pod-num{font-size:22px;font-weight:800}
+.pod-icon{font-size:16px}
+.result-table{width:100%;max-width:680px;background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden}
+.rt-row{display:grid;grid-template-columns:36px 1fr 70px 60px 60px 60px;padding:9px 14px;border-bottom:1px solid var(--brd);align-items:center;font-size:13px}
+.rt-row:last-child{border-bottom:none}
+.rt-row.hdr{background:var(--surf2);font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt3)}
+.rt-rnk{font-weight:700;color:var(--txt3)}
+.rt-pts{font-weight:800;color:var(--blue);text-align:right}
+.rt-ok{color:var(--green);text-align:center}
+.rt-bad{color:var(--red);text-align:center}
+.rt-stg{color:var(--txt3);text-align:center}
+.knowledge-box{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);padding:20px;max-width:680px;width:100%}
+.kb-title{font-size:15px;font-weight:700;color:var(--blue);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.kb-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--brd);font-size:13px;line-height:1.6}
+.kb-item:last-child{border-bottom:none}
+.kb-term{font-weight:700;color:var(--txt);min-width:120px;flex-shrink:0}
+.kb-def{color:var(--txt2)}
+
+@media(max-width:700px){
+  .game-body,.teacher-body{grid-template-columns:1fr}
+  .game-side,.teacher-side{display:none}
+  .disc-grid{grid-template-columns:repeat(2,1fr)}
+  .home-title{font-size:30px}
+}
+</style>
+</head>
+<body>
+<div id="toasts"></div>
+
+<!-- ══ PAGE 1: HOME ══ -->
+<div id="p-home" class="page on">
+  <div class="home-title">Bàn Gỡ Rối<br><em>Thông Tin &amp; Dữ Liệu</em></div>
+  <div class="home-subtitle">Trò chơi khám phá theo phương pháp dạy học khám phá có hướng dẫn. Lật thẻ bí ẩn, giải câu đố, kết nối khái niệm và xây dựng sơ đồ tư duy cùng nhóm.</div>
+  <div class="role-grid">
+    <div class="role-card" onclick="goLogin()">
+      <i class="ti ti-users" aria-hidden="true"></i>
+      <h3>Học sinh / Nhóm</h3>
+      <p>Đăng nhập theo nhóm và bắt đầu khám phá bài học</p>
+    </div>
+    <div class="role-card" onclick="goTeacher()">
+      <i class="ti ti-presentation-analytics" aria-hidden="true"></i>
+      <h3>Giáo viên</h3>
+      <p>Mở bảng giám sát toàn lớp, điều phối giai đoạn và xem điểm trực tiếp</p>
+    </div>
+  </div>
+  <div style="font-size:12px;color:var(--txt3)">Tin học 10 · Bài 1: Thông tin và Xử lý thông tin · Kết nối Tri thức</div>
+</div>
+
+<!-- ══ PAGE 2: GROUP LOGIN ══ -->
+<div id="p-login" class="page">
+  <div class="login-box">
+    <div style="text-align:center">
+      <i class="ti ti-puzzle" style="font-size:40px;color:var(--blue)" aria-hidden="true"></i>
+      <h2 style="margin-top:8px">Đăng nhập nhóm</h2>
+      <p style="font-size:13px;color:var(--txt2);margin-top:4px">Chọn nhóm của bạn để bắt đầu</p>
+    </div>
+    <div class="form-row">
+      <div class="form-label">Chọn nhóm</div>
+      <div class="group-btn-grid" id="group-pick-grid"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">Tên hiển thị nhóm (tuỳ chỉnh)</div>
+      <input id="custom-name" type="text" placeholder="Ví dụ: Nhóm Thám Tử" maxlength="24">
+    </div>
+    <div id="login-alert" class="alert alert-info" style="display:none"></div>
+    <button class="btn btn-primary" onclick="doLogin()" style="width:100%">
+      <i class="ti ti-player-play" aria-hidden="true"></i> Vào phòng học
+    </button>
+    <button class="btn btn-ghost btn-sm" onclick="show('p-home')" style="margin-top:-8px">
+      <i class="ti ti-arrow-left" aria-hidden="true"></i> Quay lại
+    </button>
+  </div>
+</div>
+
+<!-- ══ PAGE 3: GAME ══ -->
+<div id="p-game" class="page">
+  <div class="nav">
+    <div class="nav-brand"><i class="ti ti-puzzle" aria-hidden="true"></i> Bàn Gỡ Rối</div>
+    <div class="nav-right">
+      <span class="pill pill-blue" id="g-group-pill">Nhóm —</span>
+      <span class="pill" id="g-stage-pill" style="background:var(--surf2);color:var(--txt2)">Giai đoạn 1</span>
+      <span class="pill pill-amber" id="g-score-pill">0 đ</span>
+    </div>
+  </div>
+  <div class="game-body">
+    <div class="game-main" id="game-main"></div>
+    <div class="game-side">
+      <div>
+        <div class="side-title">Hành trình khám phá</div>
+        <div class="stage-steps" id="stage-steps"></div>
+      </div>
+      <div>
+        <div class="side-title">Bảng điểm lớp</div>
+        <div class="mini-leaderboard" id="mini-lb"></div>
+      </div>
+      <div style="margin-top:auto">
+        <div class="alert alert-info" id="side-hint" style="font-size:12px;line-height:1.5"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE 4: TEACHER ══ -->
+<div id="p-teacher" class="page">
+  <div class="nav">
+    <div class="nav-brand"><i class="ti ti-presentation-analytics" aria-hidden="true"></i> Bảng giám sát · Giáo viên</div>
+    <div class="nav-right">
+      <button class="btn btn-ghost btn-sm" onclick="show('p-home')"><i class="ti ti-home" aria-hidden="true"></i></button>
+      <button class="btn btn-primary btn-sm" onclick="showResults()"><i class="ti ti-podium" aria-hidden="true"></i> Kết thúc</button>
+    </div>
+  </div>
+  <div class="teacher-body">
+    <div class="teacher-main" id="teacher-main"></div>
+    <div class="teacher-side">
+      <div class="phase-ctrl-card">
+        <div class="side-title">Điều phối giai đoạn</div>
+        <div class="pcc-phase" id="t-phase-name">Giai đoạn 1</div>
+        <div class="pcc-desc" id="t-phase-desc">–</div>
+        <button class="btn btn-primary btn-sm" onclick="teacherNextPhase()">
+          <i class="ti ti-step-forward" aria-hidden="true"></i> Chuyển giai đoạn
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="teacherRevealAll()">
+          <i class="ti ti-eye" aria-hidden="true"></i> Lật hết thẻ (giai đoạn 1)
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="teacherResetAll()">
+          <i class="ti ti-refresh" aria-hidden="true"></i> Reset tất cả nhóm
         </button>
       </div>
-    </div>
-
-    <!-- ══════════════ SCREEN 1: CHALLENGE 1 – SỐ ══════════════ -->
-    <div id="s1" class="screen">
-      <div class="chdr">
-        <div class="chdr-l">
-          <span class="cbadge">Thử thách 1</span>
-          <span class="cname">Mật mã Số</span>
-          <span class="gtag" id="gt1">Nhóm ?</span>
-        </div>
-        <div class="timer" id="t1">⏱ 05:00</div>
+      <div>
+        <div class="side-title">Bảng điểm</div>
+        <div class="teacher-scoreboard" id="t-scoreboard"></div>
       </div>
-      <div class="cbody">
-        <div class="mission">
-          <div class="mission-ico">🔢</div>
-          <div class="mission-text">
-            <h2>Giải mã dữ liệu số</h2>
-            <p>
-              Các con số dưới đây được trích từ một thiết bị điện tử. Nhóm hãy
-              thảo luận: <strong>Chúng là gì? Có nghĩa gì?</strong> Mở từng manh
-              mối để tìm ra thông tin ẩn giấu.
-            </p>
-          </div>
-        </div>
-        <div class="cols">
-          <!-- Raw data -->
-          <div class="panel blue-border">
-            <div class="plabel">📊 Dữ liệu thô nhận được</div>
-            <div class="chips">
-              <div class="chip">37.5</div>
-              <div class="chip">38.1</div>
-              <div class="chip">38.9</div>
-              <div class="chip">39.5</div>
-              <div class="chip">39.1</div>
-              <div class="chip">38.4</div>
-              <div class="chip">37.8</div>
-              <div class="chip">36.8</div>
-            </div>
-            <div class="confused">
-              <span>🤔</span>
-              Các con số rời rạc... Chưa có đủ thông tin để hiểu!
-            </div>
-          </div>
-          <!-- Illustration: Temperature chart -->
-          <div
-            class="panel amber-border"
-            style="
-              align-items: center;
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-            "
-          >
-            <div class="plabel">📈 Biểu đồ (sau khi giải mã)</div>
-            <svg width="100%" viewBox="0 0 290 185" style="max-width: 290px">
-              <rect width="290" height="185" rx="8" fill="rgba(8,15,32,.6)" />
-              <!-- Fever zone -->
-              <rect
-                x="44"
-                y="16"
-                width="234"
-                height="72"
-                fill="rgba(239,68,68,.08)"
-                rx="4"
-              />
-              <text
-                x="50"
-                y="28"
-                fill="rgba(239,68,68,.55)"
-                font-size="9"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                ⚠ Vùng sốt (&gt;38°C)
-              </text>
-              <!-- Grid horizontals -->
-              <line
-                x1="44"
-                y1="24"
-                x2="278"
-                y2="24"
-                stroke="rgba(120,153,192,.12)"
-                stroke-width="1"
-                stroke-dasharray="3"
-              />
-              <line
-                x1="44"
-                y1="60"
-                x2="278"
-                y2="60"
-                stroke="rgba(120,153,192,.12)"
-                stroke-width="1"
-                stroke-dasharray="3"
-              />
-              <line
-                x1="44"
-                y1="96"
-                x2="278"
-                y2="96"
-                stroke="rgba(120,153,192,.12)"
-                stroke-width="1"
-                stroke-dasharray="3"
-              />
-              <line
-                x1="44"
-                y1="132"
-                x2="278"
-                y2="132"
-                stroke="rgba(120,153,192,.12)"
-                stroke-width="1"
-                stroke-dasharray="3"
-              />
-              <!-- Axes -->
-              <line
-                x1="44"
-                y1="16"
-                x2="44"
-                y2="148"
-                stroke="rgba(120,153,192,.3)"
-                stroke-width="1"
-              />
-              <line
-                x1="44"
-                y1="148"
-                x2="278"
-                y2="148"
-                stroke="rgba(120,153,192,.3)"
-                stroke-width="1"
-              />
-              <!-- Y labels -->
-              <text
-                x="4"
-                y="27"
-                fill="#7899c0"
-                font-size="9"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                40°
-              </text>
-              <text
-                x="4"
-                y="63"
-                fill="#7899c0"
-                font-size="9"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                39°
-              </text>
-              <text
-                x="4"
-                y="99"
-                fill="#7899c0"
-                font-size="9"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                38°
-              </text>
-              <text
-                x="4"
-                y="135"
-                fill="#7899c0"
-                font-size="9"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                37°
-              </text>
-              <!-- Area fill -->
-              <polygon
-                points="44,114 74,96 104,68 134,42 164,55 194,82 224,100 254,134 254,148 44,148"
-                fill="rgba(59,130,246,.12)"
-              />
-              <!-- Line -->
-              <polyline
-                points="44,114 74,96 104,68 134,42 164,55 194,82 224,100 254,134"
-                fill="none"
-                stroke="#3b82f6"
-                stroke-width="2.5"
-                stroke-linejoin="round"
-                stroke-linecap="round"
-              />
-              <!-- Dots -->
-              <circle cx="44" cy="114" r="4" fill="#60a5fa" />
-              <circle cx="74" cy="96" r="4" fill="#60a5fa" />
-              <circle cx="104" cy="68" r="4" fill="#f87171" />
-              <circle
-                cx="134"
-                cy="42"
-                r="7"
-                fill="#ef4444"
-                stroke="white"
-                stroke-width="2"
-              />
-              <circle cx="164" cy="55" r="4" fill="#f87171" />
-              <circle cx="194" cy="82" r="4" fill="#fbbf24" />
-              <circle cx="224" cy="100" r="4" fill="#fbbf24" />
-              <circle cx="254" cy="134" r="4" fill="#34d399" />
-              <!-- Peak label -->
-              <text
-                x="134"
-                y="34"
-                fill="#ef4444"
-                font-size="9"
-                text-anchor="middle"
-                font-weight="700"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                ↑ 39.5°C
-              </text>
-              <!-- Recovery label -->
-              <text
-                x="254"
-                y="144"
-                fill="#34d399"
-                font-size="8"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                Hồi phục
-              </text>
-              <!-- X labels -->
-              <text
-                x="44"
-                y="162"
-                fill="#7899c0"
-                font-size="8"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                6h
-              </text>
-              <text
-                x="74"
-                y="162"
-                fill="#7899c0"
-                font-size="8"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                8h
-              </text>
-              <text
-                x="104"
-                y="162"
-                fill="#7899c0"
-                font-size="8"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                10h
-              </text>
-              <text
-                x="134"
-                y="162"
-                fill="#7899c0"
-                font-size="8"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                12h
-              </text>
-              <text
-                x="164"
-                y="162"
-                fill="#7899c0"
-                font-size="8"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                14h
-              </text>
-              <text
-                x="194"
-                y="162"
-                fill="#7899c0"
-                font-size="8"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                16h
-              </text>
-              <text
-                x="224"
-                y="162"
-                fill="#7899c0"
-                font-size="8"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                18h
-              </text>
-              <text
-                x="254"
-                y="162"
-                fill="#7899c0"
-                font-size="8"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                20h
-              </text>
-              <text
-                x="161"
-                y="178"
-                fill="rgba(120,153,192,.5)"
-                font-size="8"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                Biểu đồ thân nhiệt 24h — Bệnh nhân Nguyễn Văn A
-              </text>
-            </svg>
-          </div>
-        </div>
-
-        <!-- Clues -->
-        <div class="clue-wrap">
-          <div class="plabel" style="margin-bottom: 14px">
-            🔑 Mở khóa manh mối — Nhấn lần lượt từng manh mối
-          </div>
-
-          <button class="clue-btn" id="cb1_1" onclick="revealClue(1, 1)">
-            <div class="cnum">1</div>
-            <div class="clbl">🌡️ Manh mối 1: Đơn vị & Thiết bị</div>
-            <div class="carr">▶</div>
-          </button>
-          <div class="clue-reveal" id="cr1_1">
-            <div class="rh">✅ Manh mối 1 đã mở khóa!</div>
-            <div class="rc">
-              Đơn vị đo: <strong>°C (Độ Celsius)</strong> · Thiết bị:
-              <strong>Nhiệt kế điện tử y tế</strong><br />
-              <em style="color: var(--muted)"
-                >→ Ghi nhận vào phiếu thu hoạch: Cột "Dữ liệu thô" — đây là các
-                con số đo nhiệt độ</em
-              >
-            </div>
-          </div>
-
-          <button
-            class="clue-btn"
-            id="cb1_2"
-            onclick="revealClue(1, 2)"
-            disabled
-          >
-            <div class="cnum">2</div>
-            <div class="clbl">📅 Manh mối 2: Thời gian & Tần suất</div>
-            <div class="carr">▶</div>
-          </button>
-          <div class="clue-reveal" id="cr1_2">
-            <div class="rh">✅ Manh mối 2 đã mở khóa!</div>
-            <div class="rc">
-              Thời gian đo:
-              <strong>06:00 → 20:00 (đo cách nhau 2 giờ một lần)</strong><br />
-              <em style="color: var(--muted)"
-                >→ Bây giờ các con số bắt đầu có trật tự hơn. Chúng là các điểm
-                thời gian!</em
-              >
-            </div>
-          </div>
-
-          <button
-            class="clue-btn"
-            id="cb1_3"
-            onclick="revealClue(1, 3)"
-            disabled
-          >
-            <div class="cnum">3</div>
-            <div class="clbl">👤 Manh mối 3: Chủ thể & Bối cảnh</div>
-            <div class="carr">▶</div>
-          </button>
-          <div class="clue-reveal" id="cr1_3">
-            <div class="rh">✅ Manh mối 3 đã mở khóa!</div>
-            <div class="rc">
-              <strong
-                >Bệnh nhân: Nguyễn Văn A — Phòng 201 · Bệnh viện Đa khoa Cần
-                Thơ</strong
-              ><br />
-              Bác sĩ ghi nhận để theo dõi diễn biến sức khỏe trong ngày.<br />
-              <em style="color: var(--muted)"
-                >→ Giờ thì nhóm đã đủ ngữ cảnh. Điền cột "Ý nghĩa / Thông tin
-                rút ra" vào phiếu!</em
-              >
-            </div>
-          </div>
-        </div>
-
-        <div class="ans-panel" id="a1">
-          <div class="ans-h">🎉 Giải mã Thành công — Thử thách 1!</div>
-          <div class="ans-txt">
-            <strong style="color: var(--amber2)">Thông tin rút ra:</strong> Bệnh
-            nhân Nguyễn Văn A <strong>đang bị sốt cao</strong>. Thân nhiệt tăng
-            dần từ 37.5°C (6h sáng) → đạt đỉnh
-            <strong>39.5°C lúc 12h trưa</strong> → giảm dần về 36.8°C (20h tối).
-            Bệnh nhân đang <strong>hồi phục tốt</strong> sau khi dùng thuốc hạ
-            sốt.
-          </div>
-          <div class="principle">
-            <strong>🧠 Nguyên lý cốt lõi</strong>
-            "37.5 — 38.9 — 39.5..." là <em>Dữ liệu</em> — các con số rời rạc, vô
-            nghĩa nếu đứng một mình. Khi có đơn vị (°C) + thời gian (6h→20h) +
-            chủ thể (bệnh nhân A) → trở thành <em>Thông tin y tế</em> có giá trị
-            quyết định điều trị!
-          </div>
-        </div>
-
-        <div class="remind">
-          📝 <strong>Thư ký nhớ:</strong> Ghi vào Phần I — hàng "Thử thách 1:
-          Mật mã số" → cột Dữ liệu thô & Ý nghĩa rút ra
-        </div>
-        <div class="cnav">
-          <button class="btn-next" id="n1" onclick="goTo(2)">
-            Thử thách tiếp theo →
-          </button>
-        </div>
+      <div>
+        <div class="side-title">Cần chú ý</div>
+        <div id="t-attention"></div>
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- ══════════════ SCREEN 2: CHALLENGE 2 – ÂM THANH ══════════════ -->
-    <div id="s2" class="screen">
-      <div class="chdr">
-        <div class="chdr-l">
-          <span class="cbadge">Thử thách 2</span>
-          <span class="cname">Mật mã Âm thanh</span>
-          <span class="gtag" id="gt2">Nhóm ?</span>
-        </div>
-        <div class="timer" id="t2">⏱ 05:00</div>
-      </div>
-      <div class="cbody">
-        <div class="mission">
-          <div class="mission-ico">🔊</div>
-          <div class="mission-text">
-            <h2>Giải mã tín hiệu âm thanh</h2>
-            <p>
-              Hệ thống thu âm ghi lại các tín hiệu dưới đây. Nhóm hãy quan sát
-              dạng sóng và các ký hiệu:
-              <strong>Đây là âm thanh gì? Nó truyền thông tin gì?</strong>
-            </p>
-          </div>
-        </div>
-        <div class="cols">
-          <!-- Raw sound data -->
-          <div class="panel blue-border">
-            <div class="plabel">🎵 Dữ liệu âm thanh thô</div>
-            <!-- Morse SVG -->
-            <svg
-              width="100%"
-              viewBox="0 0 260 130"
-              style="
-                max-width: 260px;
-                margin: 0 auto;
-                display: block;
-                margin-bottom: 14px;
-              "
-            >
-              <rect width="260" height="130" rx="8" fill="rgba(8,15,32,.7)" />
-              <!-- Sound wave bg -->
-              <path
-                d="M10,100 Q16,88 22,100 Q28,112 34,100 Q40,88 46,100 Q52,112 58,100 Q64,88 70,100"
-                fill="none"
-                stroke="rgba(59,130,246,.3)"
-                stroke-width="1.5"
-              />
-              <path
-                d="M186,100 Q192,88 198,100 Q204,112 210,100 Q216,88 222,100 Q228,112 234,100 Q240,88 246,100"
-                fill="none"
-                stroke="rgba(59,130,246,.3)"
-                stroke-width="1.5"
-              />
-              <!-- S: three dots -->
-              <circle cx="24" cy="48" r="10" fill="#f59e0b" opacity=".95" />
-              <circle cx="24" cy="48" r="5" fill="#fbbf24" />
-              <circle cx="44" cy="48" r="10" fill="#f59e0b" opacity=".95" />
-              <circle cx="44" cy="48" r="5" fill="#fbbf24" />
-              <circle cx="64" cy="48" r="10" fill="#f59e0b" opacity=".95" />
-              <circle cx="64" cy="48" r="5" fill="#fbbf24" />
-              <!-- O: three dashes -->
-              <rect
-                x="88"
-                y="38"
-                width="28"
-                height="20"
-                rx="10"
-                fill="#ef4444"
-                opacity=".9"
-              />
-              <rect
-                x="88"
-                y="42"
-                width="28"
-                height="12"
-                rx="6"
-                fill="#f87171"
-              />
-              <rect
-                x="122"
-                y="38"
-                width="28"
-                height="20"
-                rx="10"
-                fill="#ef4444"
-                opacity=".9"
-              />
-              <rect
-                x="122"
-                y="42"
-                width="28"
-                height="12"
-                rx="6"
-                fill="#f87171"
-              />
-              <rect
-                x="156"
-                y="38"
-                width="28"
-                height="20"
-                rx="10"
-                fill="#ef4444"
-                opacity=".9"
-              />
-              <rect
-                x="156"
-                y="42"
-                width="28"
-                height="12"
-                rx="6"
-                fill="#f87171"
-              />
-              <!-- S: three dots -->
-              <circle cx="198" cy="48" r="10" fill="#f59e0b" opacity=".95" />
-              <circle cx="198" cy="48" r="5" fill="#fbbf24" />
-              <circle cx="218" cy="48" r="10" fill="#f59e0b" opacity=".95" />
-              <circle cx="218" cy="48" r="5" fill="#fbbf24" />
-              <circle cx="238" cy="48" r="10" fill="#f59e0b" opacity=".95" />
-              <circle cx="238" cy="48" r="5" fill="#fbbf24" />
-              <!-- Labels -->
-              <text
-                x="44"
-                y="72"
-                fill="rgba(245,158,11,.7)"
-                font-size="10"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                ● ● ●
-              </text>
-              <text
-                x="44"
-                y="83"
-                fill="rgba(120,153,192,.6)"
-                font-size="9"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                Ngắn
-              </text>
-              <text
-                x="137"
-                y="72"
-                fill="rgba(239,68,68,.7)"
-                font-size="10"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                ▬ ▬ ▬
-              </text>
-              <text
-                x="137"
-                y="83"
-                fill="rgba(120,153,192,.6)"
-                font-size="9"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                Dài
-              </text>
-              <text
-                x="218"
-                y="72"
-                fill="rgba(245,158,11,.7)"
-                font-size="10"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                ● ● ●
-              </text>
-              <text
-                x="218"
-                y="83"
-                fill="rgba(120,153,192,.6)"
-                font-size="9"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                Ngắn
-              </text>
-              <text
-                x="130"
-                y="118"
-                fill="rgba(120,153,192,.45)"
-                font-size="9"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                ~ ~ ~ Tín hiệu âm thanh thu được ~ ~ ~
-              </text>
-            </svg>
-            <div class="confused">
-              <span>🤔</span>
-              Các chấm tròn và vạch dài... ký hiệu bí ẩn này có ý nghĩa gì?
-            </div>
-          </div>
-          <!-- Illustration: Morse code explained -->
-          <div
-            class="panel amber-border"
-            style="
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-            "
-          >
-            <div class="plabel">
-              📡 Bảng giải mã Morse (sau khi có ngữ cảnh)
-            </div>
-            <svg
-              width="100%"
-              viewBox="0 0 260 200"
-              style="max-width: 260px; margin: 0 auto; display: block"
-            >
-              <rect width="260" height="200" rx="8" fill="rgba(8,15,32,.6)" />
-              <!-- Header -->
-              <text
-                x="130"
-                y="22"
-                fill="#f59e0b"
-                font-size="11"
-                text-anchor="middle"
-                font-weight="700"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                BẢNG MÃ MORSE QUỐC TẾ
-              </text>
-              <line
-                x1="10"
-                y1="28"
-                x2="250"
-                y2="28"
-                stroke="rgba(245,158,11,.25)"
-                stroke-width="1"
-              />
-              <!-- S row -->
-              <rect
-                x="10"
-                y="34"
-                width="240"
-                height="32"
-                rx="4"
-                fill="rgba(245,158,11,.08)"
-              />
-              <text
-                x="26"
-                y="54"
-                fill="#fbbf24"
-                font-size="18"
-                font-weight="900"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                S
-              </text>
-              <text
-                x="60"
-                y="51"
-                fill="#7899c0"
-                font-size="11"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                =
-              </text>
-              <circle cx="80" cy="50" r="5" fill="#f59e0b" />
-              <circle cx="94" cy="50" r="5" fill="#f59e0b" />
-              <circle cx="108" cy="50" r="5" fill="#f59e0b" />
-              <text
-                x="130"
-                y="54"
-                fill="rgba(120,153,192,.6)"
-                font-size="10"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                3 dit (ngắn)
-              </text>
-              <!-- O row -->
-              <rect
-                x="10"
-                y="70"
-                width="240"
-                height="32"
-                rx="4"
-                fill="rgba(239,68,68,.08)"
-              />
-              <text
-                x="26"
-                y="90"
-                fill="#f87171"
-                font-size="18"
-                font-weight="900"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                O
-              </text>
-              <text
-                x="60"
-                y="87"
-                fill="#7899c0"
-                font-size="11"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                =
-              </text>
-              <rect
-                x="76"
-                y="80"
-                width="16"
-                height="10"
-                rx="5"
-                fill="#ef4444"
-              />
-              <rect
-                x="97"
-                y="80"
-                width="16"
-                height="10"
-                rx="5"
-                fill="#ef4444"
-              />
-              <rect
-                x="118"
-                y="80"
-                width="16"
-                height="10"
-                rx="5"
-                fill="#ef4444"
-              />
-              <text
-                x="148"
-                y="90"
-                fill="rgba(120,153,192,.6)"
-                font-size="10"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                3 dah (dài)
-              </text>
-              <!-- Combined -->
-              <rect
-                x="10"
-                y="106"
-                width="240"
-                height="38"
-                rx="4"
-                fill="rgba(16,185,129,.08)"
-              />
-              <text
-                x="26"
-                y="122"
-                fill="#34d399"
-                font-size="11"
-                font-weight="700"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                ●●● ▬▬▬ ●●●
-              </text>
-              <text
-                x="130"
-                y="136"
-                fill="#34d399"
-                font-size="14"
-                font-weight="900"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                = "S O S"
-              </text>
-              <!-- Visual SOS final -->
-              <rect
-                x="10"
-                y="150"
-                width="240"
-                height="44"
-                rx="8"
-                fill="rgba(239,68,68,.15)"
-                stroke="rgba(239,68,68,.5)"
-                stroke-width="1"
-              />
-              <text
-                x="130"
-                y="170"
-                fill="#ef4444"
-                font-size="13"
-                font-weight="900"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                🆘 SAVE OUR SOULS
-              </text>
-              <text
-                x="130"
-                y="186"
-                fill="rgba(239,68,68,.7)"
-                font-size="10"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                Tín hiệu cầu cứu quốc tế khẩn cấp!
-              </text>
-            </svg>
-          </div>
-        </div>
-
-        <div class="clue-wrap">
-          <div class="plabel" style="margin-bottom: 14px">
-            🔑 Mở khóa manh mối
-          </div>
-          <button class="clue-btn" id="cb2_1" onclick="revealClue(2, 1)">
-            <div class="cnum">1</div>
-            <div class="clbl">📡 Manh mối 1: Nguồn gốc tín hiệu</div>
-            <div class="carr">▶</div>
-          </button>
-          <div class="clue-reveal" id="cr2_1">
-            <div class="rh">✅ Manh mối 1 đã mở khóa!</div>
-            <div class="rc">
-              Tín hiệu được ghi lại từ
-              <strong>máy thu sóng radio hàng hải</strong>. Đây là dạng tín hiệu
-              <strong>Morse International</strong> (chuẩn quốc tế từ năm
-              1865).<br />
-              <em style="color: var(--muted)"
-                >→ Dữ liệu thô: các âm ngắn (dit) và âm dài (dah) xen kẽ
-                nhau</em
-              >
-            </div>
-          </div>
-          <button
-            class="clue-btn"
-            id="cb2_2"
-            onclick="revealClue(2, 2)"
-            disabled
-          >
-            <div class="cnum">2</div>
-            <div class="clbl">🔑 Manh mối 2: Bảng mã giải nghĩa</div>
-            <div class="carr">▶</div>
-          </button>
-          <div class="clue-reveal" id="cr2_2">
-            <div class="rh">✅ Manh mối 2 đã mở khóa!</div>
-            <div class="rc">
-              Quy tắc Morse:
-              <strong>● (dit) = tín hiệu ngắn · ▬ (dah) = tín hiệu dài</strong
-              ><br />
-              S = ● ● ● · O = ▬ ▬ ▬<br />
-              <em style="color: var(--muted)"
-                >→ Bây giờ nhóm đã có "ngữ cảnh" = bảng giải mã. Hãy thử giải mã
-                tín hiệu!</em
-              >
-            </div>
-          </div>
-          <button
-            class="clue-btn"
-            id="cb2_3"
-            onclick="revealClue(2, 3)"
-            disabled
-          >
-            <div class="cnum">3</div>
-            <div class="clbl">🆘 Manh mối 3: Hoàn cảnh phát tín hiệu</div>
-            <div class="carr">▶</div>
-          </button>
-          <div class="clue-reveal" id="cr2_3">
-            <div class="rh">✅ Manh mối 3 đã mở khóa!</div>
-            <div class="rc">
-              Tín hiệu phát từ <strong>tàu đánh cá Phú Quốc 05</strong>, vị trí:
-              vùng biển Tây Nam · ngày 14/05 lúc 2h sáng.<br />
-              <em style="color: var(--muted)"
-                >→ Ghép lại toàn bộ: ●●● ▬▬▬ ●●● = SOS. Điền thông tin vào phiếu
-                thu hoạch!</em
-              >
-            </div>
-          </div>
-        </div>
-
-        <div class="ans-panel" id="a2">
-          <div class="ans-h">🎉 Giải mã Thành công — Thử thách 2!</div>
-          <div class="ans-txt">
-            <strong style="color: var(--amber2)">Thông tin rút ra:</strong> Tàu
-            đánh cá Phú Quốc 05 đang
-            <strong>gặp nạn khẩn cấp trên biển</strong>! Tín hiệu SOS phát đi
-            lúc 2h sáng yêu cầu cứu trợ ngay lập tức. Lực lượng Cảnh sát Biển
-            cần <strong>điều tàu cứu hộ đến tọa độ đã xác định</strong>.
-          </div>
-          <div class="principle">
-            <strong>🧠 Nguyên lý cốt lõi</strong>
-            Âm thanh ngắn/dài là <em>Dữ liệu</em> thuần túy. Khi có
-            <em>Ngữ cảnh</em> (bảng mã Morse + hoàn cảnh tàu biển) →
-            <em>Thông tin</em> trở thành tín hiệu cứu sống con người! Ngữ cảnh
-            là chìa khóa biến dữ liệu thành thông tin.
-          </div>
-        </div>
-
-        <div class="remind">
-          📝 <strong>Thư ký nhớ:</strong> Ghi vào Phần I — hàng "Thử thách 2:
-          Mật mã âm thanh" với ít nhất 3 ý khác nhau
-        </div>
-        <div class="cnav">
-          <button class="btn-next" id="n2" onclick="goTo(3)">
-            Thử thách cuối cùng →
-          </button>
-        </div>
-      </div>
+<!-- ══ PAGE 5: RESULTS ══ -->
+<div id="p-results" class="page">
+  <div style="font-size:26px;font-weight:800;text-align:center">Kết quả cuối buổi học</div>
+  <div class="podium-wrap" id="res-podium"></div>
+  <div class="result-table">
+    <div class="rt-row hdr">
+      <div>Hạng</div><div>Nhóm</div>
+      <div class="rt-pts">Điểm</div>
+      <div class="rt-ok">Đúng</div>
+      <div class="rt-bad">Sai</div>
+      <div class="rt-stg">Gđ</div>
     </div>
+    <div id="res-rows"></div>
+  </div>
+  <div class="knowledge-box">
+    <div class="kb-title"><i class="ti ti-bulb" aria-hidden="true"></i> Chốt kiến thức – Bài 1</div>
+    <div class="kb-item"><div class="kb-term">Dữ liệu</div><div class="kb-def">Các con số, hình ảnh, âm thanh, văn bản được ghi lại nhưng <em>chưa mang ý nghĩa cụ thể</em> khi đứng độc lập.</div></div>
+    <div class="kb-item"><div class="kb-term">Thông tin</div><div class="kb-def">Ý nghĩa mang lại sự hiểu biết, giúp con người đưa ra quyết định hoặc hành động.</div></div>
+    <div class="kb-item"><div class="kb-term">Ngữ cảnh</div><div class="kb-def">Yếu tố then chốt chuyển hoá dữ liệu thành thông tin có ý nghĩa.</div></div>
+    <div class="kb-item"><div class="kb-term">Chu trình xử lý</div><div class="kb-def">Dữ liệu đầu vào → Xử lý / Lưu trữ (CPU, RAM) → Thông tin đầu ra.</div></div>
+  </div>
+  <button class="btn btn-ghost" onclick="show('p-home')"><i class="ti ti-refresh" aria-hidden="true"></i> Chơi lại từ đầu</button>
+</div>
 
-    <!-- ══════════════ SCREEN 3: CHALLENGE 3 – ĐỒ HỌA ══════════════ -->
-    <div id="s3" class="screen">
-      <div class="chdr">
-        <div class="chdr-l">
-          <span class="cbadge">Thử thách 3</span>
-          <span class="cname">Mật mã Đồ họa</span>
-          <span class="gtag" id="gt3">Nhóm ?</span>
-        </div>
-        <div class="timer" id="t3">⏱ 05:00</div>
-      </div>
-      <div class="cbody">
-        <div class="mission">
-          <div class="mission-ico">🖼️</div>
-          <div class="mission-text">
-            <h2>Giải mã dữ liệu đồ họa</h2>
-            <p>
-              Máy tính nhận các yếu tố hình ảnh rời rạc từ thiết bị ngoại vi.
-              Nhóm hãy
-              <strong>bóc tách, ghép nối và tìm ra thông tin</strong> mà những
-              hình ảnh này muốn truyền đạt.
-            </p>
-          </div>
-        </div>
-        <div class="cols">
-          <!-- Raw graphic elements -->
-          <div class="panel blue-border">
-            <div class="plabel">🎨 Các yếu tố đồ họa rời rạc</div>
-            <svg
-              width="100%"
-              viewBox="0 0 260 200"
-              style="
-                max-width: 260px;
-                margin: 0 auto;
-                display: block;
-                margin-bottom: 12px;
-              "
-            >
-              <rect width="260" height="200" rx="8" fill="rgba(8,15,32,.7)" />
-              <!-- Floating isolated elements -->
-              <!-- Red triangle (traffic warning) -->
-              <polygon
-                points="56,36 90,90 22,90"
-                fill="none"
-                stroke="#ef4444"
-                stroke-width="4"
-                stroke-linejoin="round"
-              />
-              <text
-                x="56"
-                y="108"
-                fill="#7899c0"
-                font-size="9"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                Hình tam giác đỏ?
-              </text>
-              <!-- Exclamation -->
-              <text
-                x="148"
-                y="82"
-                fill="#f59e0b"
-                font-size="52"
-                font-weight="900"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                !
-              </text>
-              <text
-                x="148"
-                y="108"
-                fill="#7899c0"
-                font-size="9"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                Dấu chấm than?
-              </text>
-              <!-- Number 40 -->
-              <text
-                x="218"
-                y="80"
-                fill="#60a5fa"
-                font-size="34"
-                font-weight="900"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                40
-              </text>
-              <text
-                x="218"
-                y="108"
-                fill="#7899c0"
-                font-size="9"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                Con số 40?
-              </text>
-              <!-- Dashed separators -->
-              <line
-                x1="100"
-                y1="62"
-                x2="118"
-                y2="62"
-                stroke="rgba(120,153,192,.25)"
-                stroke-width="1"
-                stroke-dasharray="3"
-              />
-              <line
-                x1="178"
-                y1="62"
-                x2="196"
-                y2="62"
-                stroke="rgba(120,153,192,.25)"
-                stroke-width="1"
-                stroke-dasharray="3"
-              />
-              <!-- Big question mark -->
-              <text
-                x="130"
-                y="162"
-                fill="rgba(245,158,11,.18)"
-                font-size="72"
-                text-anchor="middle"
-                font-weight="900"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                ?
-              </text>
-              <text
-                x="130"
-                y="190"
-                fill="rgba(120,153,192,.45)"
-                font-size="9"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                Chúng có liên quan gì đến nhau không?
-              </text>
-            </svg>
-            <div class="confused">
-              <span>🤔</span>
-              Hình tam giác · dấu ! · số 40... Rời rạc, chưa có ngữ cảnh!
-            </div>
-          </div>
-          <!-- Assembled sign -->
-          <div
-            class="panel amber-border"
-            style="
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-              align-items: center;
-            "
-          >
-            <div class="plabel">🚦 Biển báo hoàn chỉnh (sau giải mã)</div>
-            <svg
-              width="100%"
-              viewBox="0 0 260 230"
-              style="max-width: 260px; margin: 0 auto; display: block"
-            >
-              <rect width="260" height="230" rx="8" fill="rgba(8,15,32,.6)" />
-              <!-- Road background -->
-              <rect
-                x="60"
-                y="160"
-                width="140"
-                height="60"
-                rx="4"
-                fill="rgba(40,40,40,.5)"
-              />
-              <line
-                x1="130"
-                y1="160"
-                x2="130"
-                y2="220"
-                stroke="rgba(245,158,11,.4)"
-                stroke-width="2"
-                stroke-dasharray="8,6"
-              />
-              <!-- Pole -->
-              <rect
-                x="126"
-                y="140"
-                width="8"
-                height="50"
-                rx="4"
-                fill="#4b5563"
-              />
-              <!-- Warning sign -->
-              <polygon
-                points="130,18 210,148 50,148"
-                fill="white"
-                stroke="#ef4444"
-                stroke-width="6"
-                stroke-linejoin="round"
-              />
-              <polygon points="130,30 198,140 62,140" fill="#fff9e6" />
-              <!-- Exclamation inside triangle -->
-              <rect
-                x="122"
-                y="60"
-                width="16"
-                height="50"
-                rx="8"
-                fill="#1a1a1a"
-              />
-              <circle cx="130" cy="124" r="8" fill="#1a1a1a" />
-              <!-- Speed limit circle -->
-              <circle
-                cx="196"
-                cy="50"
-                r="34"
-                fill="white"
-                stroke="#ef4444"
-                stroke-width="6"
-              />
-              <circle cx="196" cy="50" r="25" fill="white" />
-              <text
-                x="196"
-                y="58"
-                fill="#1a1a1a"
-                font-size="22"
-                font-weight="900"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                40
-              </text>
-              <!-- Labels -->
-              <text
-                x="90"
-                y="168"
-                fill="#7899c0"
-                font-size="8"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                ⚠ Đường nguy hiểm
-              </text>
-              <text
-                x="196"
-                y="90"
-                fill="#7899c0"
-                font-size="8"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                Tốc độ tối đa
-              </text>
-              <text
-                x="196"
-                y="100"
-                fill="#7899c0"
-                font-size="8"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                40 km/h
-              </text>
-              <text
-                x="130"
-                y="218"
-                fill="rgba(120,153,192,.5)"
-                font-size="9"
-                text-anchor="middle"
-                font-family="Be Vietnam Pro,sans-serif"
-              >
-                Biển báo nguy hiểm + Giới hạn tốc độ
-              </text>
-            </svg>
-          </div>
-        </div>
+<script>
+// ══════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════
+const GROUPS_MAX = 7;
 
-        <div class="clue-wrap">
-          <div class="plabel" style="margin-bottom: 14px">
-            🔑 Mở khóa manh mối
-          </div>
-          <button class="clue-btn" id="cb3_1" onclick="revealClue(3, 1)">
-            <div class="cnum">1</div>
-            <div class="clbl">🚗 Manh mối 1: Bối cảnh không gian</div>
-            <div class="carr">▶</div>
-          </button>
-          <div class="clue-reveal" id="cr3_1">
-            <div class="rh">✅ Manh mối 1 đã mở khóa!</div>
-            <div class="rc">
-              Các yếu tố đồ họa này được đặt
-              <strong>cạnh đường giao thông</strong>, trên cột biển báo cao 3m
-              tại đoạn đường có khúc cua nguy hiểm.<br />
-              <em style="color: var(--muted)"
-                >→ Ngữ cảnh đầu tiên: đây là hệ thống biển báo đường bộ Việt
-                Nam</em
-              >
-            </div>
-          </div>
-          <button
-            class="clue-btn"
-            id="cb3_2"
-            onclick="revealClue(3, 2)"
-            disabled
-          >
-            <div class="cnum">2</div>
-            <div class="clbl">📋 Manh mối 2: Tiêu chuẩn quốc gia</div>
-            <div class="carr">▶</div>
-          </button>
-          <div class="clue-reveal" id="cr3_2">
-            <div class="rh">✅ Manh mối 2 đã mở khóa!</div>
-            <div class="rc">
-              Theo <strong>TCVN 10382:2014</strong>: Tam giác đỏ = Biển báo nguy
-              hiểm · Dấu ! = Nguy hiểm khác · Vòng tròn đỏ + số = Giới hạn tốc
-              độ.<br />
-              <em style="color: var(--muted)"
-                >→ Quy chuẩn quốc gia chính là "ngữ cảnh" để giải mã các hình
-                ảnh đồ họa!</em
-              >
-            </div>
-          </div>
-          <button
-            class="clue-btn"
-            id="cb3_3"
-            onclick="revealClue(3, 3)"
-            disabled
-          >
-            <div class="cnum">3</div>
-            <div class="clbl">⚠️ Manh mối 3: Kết hợp & Hành động</div>
-            <div class="carr">▶</div>
-          </button>
-          <div class="clue-reveal" id="cr3_3">
-            <div class="rh">✅ Manh mối 3 đã mở khóa!</div>
-            <div class="rc">
-              <strong>Biển 1 (tam giác + !)</strong>: Đoạn đường phía trước có
-              nguy hiểm, cần đặc biệt chú ý.<br />
-              <strong>Biển 2 (vòng tròn + 40)</strong>: Tốc độ tối đa 40 km/h,
-              bắt buộc tuân thủ.<br />
-              <em style="color: var(--muted)"
-                >→ Hai biển kết hợp → một thông điệp hoàn chỉnh cho người lái
-                xe!</em
-              >
-            </div>
-          </div>
-        </div>
+const DISCOVERY_CARDS = [
+  {id:'d1',type:'data',   icon:'ti-database',   label:'Chuỗi số: 39, 40, 38',       typeLabel:'Dữ liệu thô',    hint:'Chỉ là con số, chưa biết ý nghĩa gì.'},
+  {id:'d2',type:'info',   icon:'ti-thermometer',label:'Dự báo nhiệt độ Cần Thơ hôm nay',typeLabel:'Thông tin',  hint:'Số liệu + ngữ cảnh = thông tin hữu ích.'},
+  {id:'d3',type:'context',icon:'ti-world',       label:'Ngữ cảnh: Trạm khí tượng',   typeLabel:'Ngữ cảnh',      hint:'Ngữ cảnh là "chìa khoá" tạo ra thông tin.'},
+  {id:'d4',type:'data',   icon:'ti-volume',      label:'Tiếng chuông: bip bip bip',   typeLabel:'Dữ liệu thô',   hint:'Âm thanh cô lập chưa mang ý nghĩa.'},
+  {id:'d5',type:'info',   icon:'ti-phone-incoming',label:'Có cuộc gọi đến – bắt máy!',typeLabel:'Thông tin',    hint:'Ngữ cảnh điện thoại tạo ra thông tin hành động.'},
+  {id:'d6',type:'process',icon:'ti-cpu',         label:'CPU xử lý → RAM lưu trữ',     typeLabel:'Xử lý TT',      hint:'Bộ xử lý trung tâm trong chu trình IPO.'},
+  {id:'d7',type:'data',   icon:'ti-photo',       label:'Ký hiệu đồ hoạ (biển đường)', typeLabel:'Dữ liệu thô',  hint:'Hình ảnh cô lập chưa có ý nghĩa rõ ràng.'},
+  {id:'d8',type:'info',   icon:'ti-sign-right',  label:'Cấm rẽ trái tại ngã tư này',  typeLabel:'Thông tin',     hint:'Biển báo + vị trí ngã tư = thông tin giao thông.'},
+  {id:'d9',type:'process',icon:'ti-arrow-right', label:'Đầu vào → Xử lý → Đầu ra',   typeLabel:'Xử lý TT',      hint:'Mô hình IPO chuẩn của xử lý thông tin.'},
+  {id:'d10',type:'wrong', icon:'ti-x',           label:'"Dữ liệu" và "Thông tin" là một',typeLabel:'Khái niệm SAI',hint:'Đây là phản ví dụ – cần phân biệt rõ hai khái niệm!'},
+  {id:'d11',type:'context',icon:'ti-key',        label:'Ngữ cảnh chuyển hoá dữ liệu thành thông tin',typeLabel:'Ngữ cảnh',hint:'Định nghĩa cốt lõi về vai trò của ngữ cảnh.'},
+  {id:'d12',type:'process',icon:'ti-device-desktop',label:'Thiết bị vào → Máy tính → Thiết bị ra',typeLabel:'Xử lý TT',hint:'Mô hình phần cứng máy tính theo chu trình IPO.'},
+];
 
-        <div class="ans-panel" id="a3">
-          <div class="ans-h">🎉 Giải mã Thành công — Thử thách 3!</div>
-          <div class="ans-txt">
-            <strong style="color: var(--amber2)">Thông tin rút ra:</strong> Đây
-            là
-            <strong
-              >khu vực đường nguy hiểm — giảm tốc xuống tối đa 40 km/h</strong
-            >! Người điều khiển phương tiện phải giảm tốc ngay và tập trung quan
-            sát. Vi phạm có thể gây tai nạn nghiêm trọng và bị xử phạt theo Nghị
-            định 100/2019/NĐ-CP.
-          </div>
-          <div class="principle">
-            <strong>🧠 Nguyên lý cốt lõi</strong>
-            Hình tam giác, dấu !, số 40 riêng lẻ = <em>Dữ liệu đồ họa</em> vô
-            nghĩa. Khi có <em>Ngữ cảnh</em> (quy chuẩn TCVN + vị trí đường bộ) →
-            <em>Thông tin</em> an toàn giao thông có thể bảo vệ tính mạng con
-            người!
-          </div>
-        </div>
+const STAGE1_QUIZZES = [
+  {q:'Chuỗi số "39, 40, 38" khi CHƯA có ngữ cảnh là gì?',opts:['Thông tin','Dữ liệu thô','Kết quả xử lý','Câu trả lời'],ans:1,explain:'Dữ liệu thô là dữ liệu chưa qua xử lý ngữ cảnh, chưa mang ý nghĩa cụ thể.',pts:10},
+  {q:'Yếu tố nào chuyển hoá dữ liệu thành thông tin có nghĩa?',opts:['CPU','Ngữ cảnh','RAM','Thiết bị đầu ra'],ans:1,explain:'Ngữ cảnh là "chìa khoá" giúp dữ liệu trở thành thông tin hữu ích.',pts:10},
+  {q:'Thứ tự đúng của chu trình xử lý thông tin là gì?',opts:['Xử lý → Đầu vào → Đầu ra','Đầu ra → Xử lý → Đầu vào','Đầu vào → Xử lý/Lưu trữ → Đầu ra','Đầu vào → Đầu ra → Xử lý'],ans:2,explain:'Chu trình IPO: Input → Process/Storage → Output là nền tảng của xử lý thông tin.',pts:10},
+];
 
-        <div class="remind">
-          📝 <strong>Thư ký nhớ:</strong> Ghi vào Phần I — hàng "Thử thách 3:
-          Mật mã đồ họa" rồi chuẩn bị cho Phần II — Tư duy kiến tạo
-        </div>
-        <div class="cnav">
-          <button class="btn-next" id="n3" onclick="goTo(4)">
-            🏆 Xem kết quả &amp; Phần II →
-          </button>
-        </div>
-      </div>
+const CONNECTIONS = [
+  {a:'d1',b:'d2',rel:'Dữ liệu số + ngữ cảnh khí tượng → Thông tin dự báo nhiệt độ',pts:20},
+  {a:'d1',b:'d3',rel:'Ngữ cảnh là yếu tố chuyển hoá dữ liệu số thành thông tin',pts:15},
+  {a:'d3',b:'d2',rel:'Ngữ cảnh (trạm khí tượng) tạo ra thông tin có nghĩa từ số liệu',pts:15},
+  {a:'d4',b:'d5',rel:'Tiếng chuông (dữ liệu âm thanh) → thông tin "Có cuộc gọi đến"',pts:20},
+  {a:'d6',b:'d9',rel:'CPU/RAM minh hoạ chi tiết bước Xử lý trong chu trình IPO',pts:15},
+  {a:'d9',b:'d12',rel:'Chu trình IPO được hiện thực hoá qua mô hình phần cứng máy tính',pts:15},
+  {a:'d7',b:'d8',rel:'Ký hiệu đồ hoạ (dữ liệu) + vị trí ngã tư (ngữ cảnh) → Thông tin giao thông',pts:20},
+  {a:'d11',b:'d3',rel:'Cả hai đều diễn đạt vai trò của ngữ cảnh trong xử lý thông tin',pts:10},
+  {a:'d10',b:'d1',rel:'Phản ví dụ: dữ liệu ≠ thông tin – cần phân biệt rõ hai khái niệm',pts:10},
+];
+
+const FILL_BLANKS = [
+  {sentence:'[___1___] là dữ liệu đã được đặt vào ngữ cảnh để mang [___2___] cụ thể.',blanks:['Thông tin','ý nghĩa'],opts:['Thông tin','Dữ liệu thô','ý nghĩa','ký hiệu','CPU','hình ảnh']},
+  {sentence:'Chu trình xử lý thông tin gồm: [___1___] → Xử lý/Lưu trữ → [___2___].',blanks:['Đầu vào (Input)','Đầu ra (Output)'],opts:['Đầu vào (Input)','Đầu ra (Output)','Ngữ cảnh','RAM','Thông tin','Biểu đồ']},
+  {sentence:'Cùng một dữ liệu, [___1___] khác nhau có thể tạo ra [___2___] khác nhau.',blanks:['ngữ cảnh','thông tin'],opts:['ngữ cảnh','thông tin','dữ liệu thô','phần cứng','chu trình','ký hiệu']},
+];
+
+const STAGES = [
+  {name:'Khám phá thẻ bí ẩn',icon:'ti-cards',cls:'s1',hint:'Lật từng thẻ, đọc kỹ nội dung và trả lời câu hỏi để ghi điểm. Chú ý phân biệt loại thẻ!'},
+  {name:'Kết nối khái niệm',icon:'ti-link',cls:'s2',hint:'Chọn 2 thẻ có liên hệ với nhau, xác định đúng mối quan hệ. Đúng = +điểm, sai = -5 điểm!'},
+  {name:'Xây sơ đồ tư duy',icon:'ti-topology-ring',cls:'s3',hint:'Kéo các khái niệm vào canvas và kết nối chúng thành sơ đồ tư duy hoàn chỉnh.'},
+  {name:'Điền từ vào chỗ trống',icon:'ti-pencil',cls:'s4',hint:'Hoàn thành các câu định nghĩa bằng cách chọn từ đúng. Đây là bước chốt kiến thức!'},
+];
+
+const PHASE_TEACHER_DESCS = [
+  'Giai đoạn 1: HS lật thẻ và trả lời câu hỏi khám phá. GV quan sát, đặt câu hỏi gợi mở khi nhóm bị kẹt.',
+  'Giai đoạn 2: HS kết nối các thẻ có liên hệ. GV lưu ý nhóm nào kết nối sai để gợi ý.',
+  'Giai đoạn 3: HS xây sơ đồ tư duy. GV mời 1-2 nhóm trình bày sơ đồ và so sánh.',
+  'Giai đoạn 4: Điền từ – chốt kiến thức. GV chiếu đáp án và thảo luận toàn lớp.',
+];
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+const STATE = {
+  groups:{},  // {id:{name,stage,score,correct,wrong,flipped,connections,quizDone,fillDone,lastActivity}}
+  currentGroup:null,
+  globalPhase:0,  // teacher-controlled phase (0-3)
+};
+
+function grp(){ return STATE.groups[STATE.currentGroup]; }
+function allGroups(){ return Object.values(STATE.groups); }
+
+function initGroups(){
+  for(let i=1;i<=GROUPS_MAX;i++){
+    if(!STATE.groups[i]){
+      STATE.groups[i] = {id:i,name:'Nhóm '+i,stage:0,score:0,correct:0,wrong:0,
+        flipped:[],connections:[],quizDone:[],fillDone:[],lastActivity:'Chưa bắt đầu',mmNodes:[]};
+    }
+  }
+}
+
+// ══════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════
+function show(id){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('on')); document.getElementById(id).classList.add('on'); }
+function goLogin(){ initGroups(); buildLoginPage(); show('p-login'); }
+function goTeacher(){ initGroups(); show('p-teacher'); renderTeacher(); setInterval(renderTeacher,2500); }
+
+// ══════════════════════════════════════════
+//  LOGIN PAGE
+// ══════════════════════════════════════════
+function buildLoginPage(){
+  const grid = document.getElementById('group-pick-grid');
+  grid.innerHTML = '';
+  for(let i=1;i<=GROUPS_MAX;i++){
+    const g = STATE.groups[i];
+    const isCurrent = STATE.currentGroup === i;
+    grid.innerHTML += `<button class="group-pick-btn ${isCurrent?'chosen':''}" id="gpb-${i}" onclick="pickGroup(${i})">${g.name}</button>`;
+  }
+  document.getElementById('login-alert').style.display='none';
+}
+
+function pickGroup(id){
+  STATE.currentGroup = id;
+  document.querySelectorAll('.group-pick-btn').forEach((b,j)=>b.classList.toggle('chosen',j+1===id));
+  const g = STATE.groups[id];
+  document.getElementById('custom-name').value = g.name !== 'Nhóm '+id ? g.name : '';
+  document.getElementById('login-alert').style.display='none';
+}
+
+function doLogin(){
+  if(!STATE.currentGroup){ showAlert('login-alert','Vui lòng chọn nhóm!','alert-err'); return; }
+  const customName = document.getElementById('custom-name').value.trim();
+  if(customName) STATE.groups[STATE.currentGroup].name = customName;
+  STATE.groups[STATE.currentGroup].lastActivity = 'Vừa đăng nhập';
+  startGame();
+}
+
+function showAlert(id,msg,cls){
+  const el = document.getElementById(id);
+  el.textContent = msg; el.className = 'alert '+cls; el.style.display='block';
+}
+
+// ══════════════════════════════════════════
+//  GAME START
+// ══════════════════════════════════════════
+function startGame(){
+  const g = grp();
+  document.getElementById('g-group-pill').textContent = g.name;
+  renderStageSidebar();
+  renderMiniLeaderboard();
+  renderStage();
+  show('p-game');
+}
+
+// ══════════════════════════════════════════
+//  STAGE RENDERING
+// ══════════════════════════════════════════
+function renderStage(){
+  const g = grp();
+  const st = STAGES[g.stage];
+  document.getElementById('g-stage-pill').textContent = 'Giai đoạn '+(g.stage+1);
+  document.getElementById('g-score-pill').textContent = g.score+' đ';
+  document.getElementById('side-hint').textContent = st.hint;
+  const main = document.getElementById('game-main');
+  main.innerHTML = '';
+  renderStageSidebar();
+  renderMiniLeaderboard();
+
+  // Stage header
+  main.innerHTML = `<div class="stage-header">
+    <div class="stage-icon ${st.cls}"><i class="ti ${st.icon}" aria-hidden="true"></i></div>
+    <div class="stage-meta">
+      <h3>Giai đoạn ${g.stage+1}: ${st.name}</h3>
+      <p>${st.hint}</p>
     </div>
+  </div>`;
 
-    <!-- ══════════════ SCREEN 4: SUMMARY ══════════════ -->
-    <div id="s4" class="screen">
-      <div class="sum-inner">
-        <div class="sum-hdr">
-          <div class="badge" style="margin-bottom: 16px">
-            ✅ Hoàn thành 3 thử thách
-          </div>
-          <h1>Tư duy <span>Kiến tạo Tri thức</span></h1>
-          <p>
-            Phần II — Dựa trên trải nghiệm vừa thực hiện, hoàn thiện phiếu thu
-            hoạch
-          </p>
-        </div>
+  // Score chips
+  main.innerHTML += `<div class="score-display">
+    <div class="sc-chip"><i class="ti ti-trophy" style="color:var(--amber)" aria-hidden="true"></i><div><span>Điểm</span><strong id="sc-pts">${g.score}</strong></div></div>
+    <div class="sc-chip"><i class="ti ti-check" style="color:var(--green)" aria-hidden="true"></i><div><span>Đúng</span><strong id="sc-ok">${g.correct}</strong></div></div>
+    <div class="sc-chip"><i class="ti ti-x" style="color:var(--red)" aria-hidden="true"></i><div><span>Sai</span><strong id="sc-bad">${g.wrong}</strong></div></div>
+    <div class="sc-chip"><i class="ti ti-layers" style="color:var(--txt2)" aria-hidden="true"></i><div><span>Giai đoạn</span><strong>${g.stage+1}/4</strong></div></div>
+  </div>`;
 
-        <!-- Core concepts -->
-        <div class="concept-grid">
-          <div class="cc d">
-            <div class="cc-tag">Khái niệm 1</div>
-            <h4>Dữ liệu</h4>
-            <p>
-              Các ký tự, con số, hình ảnh, âm thanh được ghi lại nhưng
-              <strong>chưa mang ý nghĩa cụ thể</strong> nếu đứng một mình. Dữ
-              liệu là "nguyên liệu thô" của thông tin.
-            </p>
-          </div>
-          <div class="cc c">
-            <div class="cc-tag">Khái niệm 2</div>
-            <h4>Ngữ cảnh</h4>
-            <p>
-              Là "chìa khóa" biến dữ liệu thành thông tin. Ngữ cảnh bao gồm: đơn
-              vị, thời gian, địa điểm, quy tắc giải mã, hoàn cảnh sử dụng.
-            </p>
-          </div>
-          <div class="cc i">
-            <div class="cc-tag">Khái niệm 3</div>
-            <h4>Thông tin</h4>
-            <p>
-              Là <strong>ý nghĩa</strong> rút ra từ dữ liệu khi đặt vào ngữ cảnh
-              phù hợp. Thông tin giúp con người hiểu biết, ra quyết định và hành
-              động.
-            </p>
-          </div>
-        </div>
+  if(g.stage===0) renderStage1(main);
+  else if(g.stage===1) renderStage2(main);
+  else if(g.stage===2) renderStage3(main);
+  else renderStage4(main);
+}
 
-        <!-- Processing cycle SVG -->
-        <div class="qa-card" style="margin-bottom: 20px">
-          <h3>📊 Chu trình Xử lý Thông tin của Máy tính</h3>
-          <svg
-            width="100%"
-            viewBox="0 0 600 110"
-            style="max-width: 600px; margin: 0 auto; display: block"
-          >
-            <!-- Input box -->
-            <rect
-              x="10"
-              y="20"
-              width="130"
-              height="70"
-              rx="10"
-              fill="rgba(59,130,246,.15)"
-              stroke="rgba(59,130,246,.5)"
-              stroke-width="1.5"
-            />
-            <text
-              x="75"
-              y="46"
-              fill="#60a5fa"
-              font-size="11"
-              font-weight="700"
-              text-anchor="middle"
-              font-family="Be Vietnam Pro,sans-serif"
-            >
-              THIẾT BỊ VÀO
-            </text>
-            <text
-              x="75"
-              y="60"
-              fill="#7899c0"
-              font-size="9"
-              text-anchor="middle"
-              font-family="Be Vietnam Pro,sans-serif"
-            >
-              Bàn phím · Chuột
-            </text>
-            <text
-              x="75"
-              y="73"
-              fill="#7899c0"
-              font-size="9"
-              text-anchor="middle"
-              font-family="Be Vietnam Pro,sans-serif"
-            >
-              Máy scan · Micro
-            </text>
-            <text
-              x="75"
-              y="100"
-              fill="#60a5fa"
-              font-size="10"
-              font-weight="700"
-              text-anchor="middle"
-              font-family="Be Vietnam Pro,sans-serif"
-            >
-              INPUT
-            </text>
-            <!-- Arrow 1 -->
-            <line
-              x1="142"
-              y1="55"
-              x2="175"
-              y2="55"
-              stroke="#f59e0b"
-              stroke-width="2"
-            />
-            <polygon points="175,50 185,55 175,60" fill="#f59e0b" />
-            <text
-              x="163"
-              y="47"
-              fill="#f59e0b"
-              font-size="9"
-              text-anchor="middle"
-              font-family="Be Vietnam Pro,sans-serif"
-            >
-              Dữ liệu
-            </text>
-            <!-- CPU box -->
-            <rect
-              x="187"
-              y="15"
-              width="140"
-              height="80"
-              rx="10"
-              fill="rgba(139,92,246,.15)"
-              stroke="rgba(139,92,246,.5)"
-              stroke-width="1.5"
-            />
-            <text
-              x="257"
-              y="40"
-              fill="#a78bfa"
-              font-size="11"
-              font-weight="700"
-              text-anchor="middle"
-              font-family="Be Vietnam Pro,sans-serif"
-            >
-              XỬ LÝ (CPU)
-            </text>
-            <text
-              x="257"
-              y="56"
-              fill="#7899c0"
-              font-size="9"
-              text-anchor="middle"
-              font-family="Be Vietnam Pro,sans-serif"
-            >
-              Tính toán · Xử lý
-            </text>
-            <text
-              x="257"
-              y="69"
-              fill="#7899c0"
-              font-size="9"
-              text-anchor="middle"
-              font-family="Be Vietnam Pro,sans-serif"
-            >
-              Lưu trữ (RAM/HDD)
-            </text>
-            <text
-              x="257"
-              y="82"
-              fill="#7899c0"
-              font-size="9"
-              text-anchor="middle"
-              font-family="Be Vietnam Pro,sans-serif"
-            >
-              Điều khiển · Phối hợp
-            </text>
-            <text
-              x="257"
-              y="108"
-              fill="#a78bfa"
-              font-size="10"
-              font-weight="700"
-              text-anchor="middle"
-              font-family="Be Vietnam Pro,sans-serif"
-            >
-              PROCESS + STORE
-            </text>
-            <!-- Arrow 2 -->
-            <line
-              x1="329"
-              y1="55"
-              x2="362"
-              y2="55"
-              stroke="#f59e0b"
-              stroke-width="2"
-            />
-            <polygon points="362,50 372,55 362,60" fill="#f59e0b" />
-            <text
-              x="350"
-              y="47"
-              fill="#f59e0b"
-              font-size="9"
-              text-anchor="middle"
-              font-family="Be Vietnam Pro,sans-serif"
-            >
-              Thông tin
-            </text>
-            <!-- Output box -->
-            <rect
-              x="374"
-              y="20"
-              width="130"
-              height="70"
-              rx="10"
-              fill="rgba(16,185,129,.15)"
-              stroke="rgba(16,185,129,.5)"
-              stroke-width="1.5"
-            />
-            <text
-              x="439"
-              y="46"
-              fill="#34d399"
-              font-size="11"
-              font-weight="700"
-              text-anchor="middle"
-              font-family="Be Vietnam Pro,sans-serif"
-            >
-              THIẾT BỊ RA
-            </text>
-            <text
-              x="439"
-              y="60"
-              fill="#7899c0"
-              font-size="9"
-              text-anchor="middle"
-              font-family="Be Vietnam Pro,sans-serif"
-            >
-              Màn hình · Loa
-            </text>
-            <text
-              x="439"
-              y="73"
-              fill="#7899c0"
-              font-size="9"
-              text-anchor="middle"
-              font-family="Be Vietnam Pro,sans-serif"
-            >
-              Máy in · Đèn LED
-            </text>
-            <text
-              x="439"
-              y="100"
-              fill="#34d399"
-              font-size="10"
-              font-weight="700"
-              text-anchor="middle"
-              font-family="Be Vietnam Pro,sans-serif"
-            >
-              OUTPUT
-            </text>
-          </svg>
-        </div>
+function updateScoreDisplay(){
+  const g = grp();
+  const el = id => document.getElementById(id);
+  if(el('sc-pts')) el('sc-pts').textContent = g.score;
+  if(el('sc-ok')) el('sc-ok').textContent = g.correct;
+  if(el('sc-bad')) el('sc-bad').textContent = g.wrong;
+  document.getElementById('g-score-pill').textContent = g.score+' đ';
+  renderMiniLeaderboard();
+  renderStageSidebar();
+}
 
-        <!-- Part II Questions -->
-        <div class="qa-card">
-          <h3>✏️ Phần II — Tư duy Kiến tạo Tri thức (ghi vào phiếu)</h3>
-          <div class="qa-item">
-            <div class="qa-q">
-              <em>Câu 1:</em> Phân biệt sự khác nhau cốt lõi giữa "Dữ liệu" và
-              "Thông tin" dựa trên 3 màn chơi vừa trải nghiệm.
-            </div>
-            <div class="qa-hint">
-              💡 Gợi ý: Nhóm hãy so sánh "trước khi mở manh mối" và "sau khi mở
-              manh mối" ở mỗi thử thách. Điều gì đã thay đổi? Cái gì giữ nguyên
-              và cái gì được thêm vào? Dùng ví dụ cụ thể từ 3 thử thách để minh
-              họa.
-            </div>
-          </div>
-          <div class="qa-item">
-            <div class="qa-q">
-              <em>Câu 2:</em> Vai trò của "Ngữ cảnh" (Context) trong việc biến
-              Dữ liệu thành Thông tin. Điều gì xảy ra nếu thiếu ngữ cảnh?
-            </div>
-            <div class="qa-hint">
-              💡 Gợi ý: Hãy nhớ lại — nếu không có bảng mã Morse, tín hiệu SOS
-              có thể cứu được tàu không? Nếu không biết đơn vị °C và chủ thể là
-              bệnh nhân, các con số nhiệt độ có giúp ích gì? → Nếu thiếu ngữ
-              cảnh: người nhận có thể hiểu sai, bỏ sót thông tin quan trọng,
-              hoặc không thể ra quyết định đúng đắn.
-            </div>
-          </div>
-          <div class="qa-item">
-            <div class="qa-q">
-              <em>Câu 3:</em> Phác thảo sơ đồ chu trình xử lý thông tin tổng
-              quát của máy tính (Vào → Xử lý/Lưu trữ → Ra).
-            </div>
-            <div class="qa-hint">
-              💡 Gợi ý: Dựa vào sơ đồ bên trên, nhóm hãy vẽ lại bằng tay vào
-              phiếu thu hoạch với các mũi tên kết nối rõ ràng. Hãy điền ví dụ
-              thiết bị cụ thể vào mỗi khối (ví dụ: bàn phím → CPU → màn hình).
-            </div>
-          </div>
-        </div>
+// ── STAGE 1: Discovery + Quiz ──
+function renderStage1(main){
+  const g = grp();
+  const needFlip = 6;
+  const flippedCount = g.flipped.length;
+  main.innerHTML += `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div style="font-size:13px;font-weight:600">Lật thẻ bí ẩn &amp; khám phá<span style="color:var(--txt3);font-weight:400"> (${flippedCount}/${DISCOVERY_CARDS.length} thẻ đã lật)</span></div>
+    ${flippedCount>=needFlip?`<button class="btn btn-primary btn-sm" onclick="finishStage1()"><i class="ti ti-arrow-right" aria-hidden="true"></i> Tiếp theo</button>`:`<span style="font-size:12px;color:var(--txt3)">Lật ít nhất ${needFlip} thẻ để tiếp tục</span>`}
+  </div>
+  <div class="prog-wrap" style="margin-bottom:12px"><div class="prog-fill" style="width:${Math.round(flippedCount/DISCOVERY_CARDS.length*100)}%;background:var(--blue)"></div></div>
+  <div class="disc-grid" id="disc-grid"></div></div>`;
 
-        <!-- Self evaluation prompt -->
-        <div class="qa-card">
-          <h3>⭐ Nhóm Tự Đánh giá (điền vào phiếu thu hoạch)</h3>
-          <div class="qa-item">
-            <div class="qa-q">
-              <em>Tiêu chí 1:</em> Mức độ tương tác và thảo luận giữa 3 thành
-              viên trong suốt chiến dịch.
-            </div>
-            <div
-              class="qa-hint"
-              style="display: flex; gap: 10px; flex-wrap: wrap"
-            >
-              <span style="color: var(--amber)">★★★ Xuất sắc</span> — Cả 3 đều
-              tham gia tích cực, tranh luận sôi nổi
-              <span style="color: var(--muted)"> | </span>
-              <span style="color: var(--amber)">★★☆ Tốt</span> — Phần lớn đều
-              tham gia
-              <span style="color: var(--muted)"> | </span>
-              <span style="color: var(--amber)">★☆☆ Cần cố gắng</span> — Chủ yếu
-              1-2 người làm
-            </div>
-          </div>
-          <div class="qa-item">
-            <div class="qa-q">
-              <em>Tiêu chí 2:</em> Sự phân công rõ ràng giữa Trưởng nhóm · Thư
-              ký · Kỹ thuật.
-            </div>
-            <div class="qa-hint">
-              Mỗi thành viên có hoàn thành đúng vai trò của mình chưa? Trưởng
-              nhóm điều phối thảo luận? Thư ký ghi nhận đầy đủ? Kỹ thuật thao
-              tác thiết bị?
-            </div>
-          </div>
-          <div class="qa-item">
-            <div class="qa-q">
-              <em>Tiêu chí 3:</em> Tốc độ và chất lượng hoàn thành các thử
-              thách.
-            </div>
-            <div class="qa-hint">
-              Nhóm mất bao nhiêu phút cho mỗi thử thách? Câu trả lời có đầy đủ,
-              chính xác và có chiều sâu tư duy không?
-            </div>
-          </div>
-        </div>
+  buildDiscGrid();
 
-        <div class="done-card">
-          <div class="stars">🏆🎉⭐</div>
-          <h3>Chúc mừng nhóm thám tử! Chiến dịch hoàn thành!</h3>
-          <p>
-            Nộp phiếu thu hoạch cho giáo viên và chuẩn bị trình bày kết quả
-            trước lớp.
-          </p>
-          <button class="btn-re" onclick="restart()">
-            ↩ Chơi lại từ đầu (nhóm khác)
-          </button>
+  // Quiz section
+  const doneAll = g.quizDone.length >= STAGE1_QUIZZES.length;
+  main.innerHTML += `<div class="quiz-box">
+    <div style="font-size:13px;font-weight:600;margin-bottom:2px"><i class="ti ti-help-circle" style="color:var(--blue)" aria-hidden="true"></i> Câu hỏi khám phá <span style="font-size:11px;color:var(--txt3);font-weight:400">(${g.quizDone.length}/${STAGE1_QUIZZES.length} đã trả lời)</span></div>
+    <div id="quiz-area"></div></div>`;
+  renderCurrentQuiz();
+}
+
+function buildDiscGrid(){
+  const g = grp();
+  const grid = document.getElementById('disc-grid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  DISCOVERY_CARDS.forEach(card=>{
+    const flipped = g.flipped.includes(card.id);
+    grid.innerHTML += `<div class="disc-card fc-wrap" id="fc-${card.id}" onclick="flipCard('${card.id}')">
+      <div class="fc ${flipped?'flipped':''}">
+        <div class="fc-front"><i class="ti ti-help-circle" style="font-size:26px;color:var(--blue);margin-bottom:6px" aria-hidden="true"></i><span style="font-size:11px;color:var(--txt3)">Nhấn để lật</span></div>
+        <div class="fc-back t-${card.type}">
+          <div class="back-type">${card.typeLabel}</div>
+          <div class="back-text">${card.label}</div>
         </div>
       </div>
+    </div>`;
+  });
+}
+
+function flipCard(id){
+  const g = grp();
+  if(g.flipped.includes(id)) return;
+  g.flipped.push(id);
+  const wrap = document.getElementById('fc-'+id);
+  if(wrap) wrap.querySelector('.fc').classList.add('flipped');
+  const card = DISCOVERY_CARDS.find(c=>c.id===id);
+  toast(card.hint,'tip');
+  addScore(2,'Lật thẻ mới');
+  updateScoreDisplay();
+  const flippedCount = g.flipped.length;
+  const btn = document.querySelector('[onclick="finishStage1()"]');
+  const info = document.querySelector('.prog-fill')?.parentElement?.nextElementSibling;
+  if(flippedCount>=6 && !btn){
+    const headerDiv = document.querySelector('#disc-grid')?.parentElement?.querySelector('div:first-child');
+    if(headerDiv){
+      headerDiv.innerHTML = `<div style="font-size:13px;font-weight:600">Lật thẻ bí ẩn &amp; khám phá <span style="color:var(--txt3);font-weight:400">(${flippedCount}/${DISCOVERY_CARDS.length} thẻ đã lật)</span></div>
+      <button class="btn btn-primary btn-sm" onclick="finishStage1()"><i class="ti ti-arrow-right" aria-hidden="true"></i> Tiếp theo</button>`;
+    }
+  }
+  const bar = document.querySelector('.prog-fill');
+  if(bar) bar.style.width = Math.round(flippedCount/DISCOVERY_CARDS.length*100)+'%';
+  g.lastActivity = 'Đang khám phá thẻ ('+flippedCount+'/'+DISCOVERY_CARDS.length+')';
+}
+
+function renderCurrentQuiz(){
+  const g = grp();
+  const qArea = document.getElementById('quiz-area');
+  if(!qArea) return;
+  const idx = g.quizDone.length;
+  if(idx >= STAGE1_QUIZZES.length){
+    qArea.innerHTML = `<div class="alert alert-success"><i class="ti ti-check" aria-hidden="true"></i> Đã hoàn thành tất cả câu hỏi khám phá! Lật thêm thẻ hoặc nhấn "Tiếp theo".</div>`;
+    return;
+  }
+  const qz = STAGE1_QUIZZES[idx];
+  qArea.innerHTML = `<div class="quiz-q">${idx+1}. ${qz.q}</div>
+  <div class="quiz-opts">${qz.opts.map((o,i)=>`<button class="quiz-opt" onclick="answerQuiz(${i})">${o}</button>`).join('')}</div>
+  <div id="quiz-fb" class="quiz-feedback" style="display:none"></div>`;
+}
+
+function answerQuiz(idx){
+  const g = grp(); const qIdx = g.quizDone.length;
+  if(qIdx>=STAGE1_QUIZZES.length) return;
+  const qz = STAGE1_QUIZZES[qIdx];
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach(b=>b.disabled=true);
+  const fb = document.getElementById('quiz-fb');
+  if(idx===qz.ans){
+    opts[idx].classList.add('correct');
+    addScore(qz.pts,'Trả lời đúng câu hỏi');
+    g.correct++;
+    toast(`+${qz.pts} điểm! Chính xác!`,'ok');
+    fb.className='quiz-feedback alert alert-success';
+    fb.innerHTML=`<i class="ti ti-check" aria-hidden="true"></i> <strong>Đúng!</strong> ${qz.explain}`;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[qz.ans].classList.add('correct');
+    addScore(-3,'Trả lời sai');
+    g.wrong++;
+    toast('-3 điểm. Xem lại đáp án nhé!','bad');
+    fb.className='quiz-feedback alert alert-err';
+    fb.innerHTML=`<i class="ti ti-x" aria-hidden="true"></i> <strong>Chưa đúng.</strong> ${qz.explain}`;
+  }
+  fb.style.display='block';
+  g.quizDone.push(qIdx);
+  updateScoreDisplay();
+  setTimeout(()=>renderCurrentQuiz(),2200);
+}
+
+function finishStage1(){
+  const g = grp();
+  if(g.flipped.length < 6){ toast('Hãy lật ít nhất 6 thẻ trước!','bad'); return; }
+  if(g.quizDone.length < STAGE1_QUIZZES.length){
+    if(!confirm('Còn câu hỏi chưa trả lời. Vẫn tiếp tục sang giai đoạn 2?')) return;
+  }
+  addScore(10,'Hoàn thành giai đoạn 1');
+  g.stage=1; g.lastActivity='Sang giai đoạn 2: Kết nối';
+  toast('+10 điểm! Chuyển sang giai đoạn 2','pts');
+  setTimeout(renderStage,400);
+}
+
+// ── STAGE 2: Connection Game ──
+let selA=null,selB=null,selRel=null;
+
+function renderStage2(main){
+  const g = grp();
+  const pool = DISCOVERY_CARDS.filter(c=>g.flipped.includes(c.id));
+  const usedIds = new Set(g.connections.flatMap(c=>[c.a,c.b]));
+  main.innerHTML += `<div class="card">
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px"><i class="ti ti-link" style="color:var(--amber)" aria-hidden="true"></i> Chọn 2 thẻ có mối liên hệ và xác định quan hệ giữa chúng</div>
+    <div class="conn-pool" id="conn-pool">${pool.map(c=>`<span class="pool-tag ${usedIds.has(c.id)?'used':''}" id="pt-${c.id}" onclick="selectPoolTag('${c.id}')">${c.label}</span>`).join('')}</div>
+    <div class="conn-slot-row">
+      <div class="conn-slot ${selA?'has-a':''}" id="cs-a">${selA?(DISCOVERY_CARDS.find(c=>c.id===selA)?.label||selA):'Thẻ thứ nhất (màu vàng)'}</div>
+      <i class="conn-arrow ti ti-link" aria-hidden="true"></i>
+      <div class="conn-slot ${selB?'has-b':''}" id="cs-b">${selB?(DISCOVERY_CARDS.find(c=>c.id===selB)?.label||selB):'Thẻ thứ hai (màu tím)'}</div>
     </div>
+    <div id="rel-area"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-primary btn-sm" id="conn-confirm-btn" onclick="confirmConn()" disabled>Xác nhận kết nối</button>
+      <button class="btn btn-ghost btn-sm" onclick="clearConn()"><i class="ti ti-x" aria-hidden="true"></i> Bỏ chọn</button>
+      ${g.connections.length>=3?`<button class="btn btn-primary btn-sm" onclick="finishStage2()" style="margin-left:auto"><i class="ti ti-arrow-right" aria-hidden="true"></i> Tiếp theo</button>`:''}
+    </div>
+  </div>`;
 
-    <script>
-      var grp = "",
-        timers = {},
-        clueState = { 1: 0, 2: 0, 3: 0 };
+  main.innerHTML += `<div class="card">
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px">Kết nối đã thực hiện (${g.connections.length})</div>
+    <div class="conn-history" id="conn-hist">${g.connections.map(c=>{
+      const cA=DISCOVERY_CARDS.find(x=>x.id===c.a),cB=DISCOVERY_CARDS.find(x=>x.id===c.b);
+      return `<div class="conn-entry ${c.ok?'ok':'fail'}"><i class="ti ti-${c.ok?'check':'x'}" aria-hidden="true"></i><span><strong>${cA?.label||c.a}</strong> ↔ <strong>${cB?.label||c.b}</strong> — ${c.rel}</span><span style="margin-left:auto;font-weight:700;white-space:nowrap">${c.ok?'+'+c.pts+' đ':'-5 đ'}</span></div>`;
+    }).join('') || '<div style="font-size:12px;color:var(--txt3);padding:6px">Chưa có kết nối nào.</div>'}</div>
+  </div>`;
+}
 
-      function startGame() {
-        var g = document.getElementById("grpNum").value;
-        if (!g) {
-          alert("Vui lòng chọn nhóm số!");
-          return;
-        }
-        grp = g;
-        document.querySelectorAll(".gtag").forEach(function (el) {
-          el.textContent = g;
-        });
-        goTo(1);
-      }
+function selectPoolTag(id){
+  const g = grp();
+  if(g.connections.some(c=>c.a===id||c.b===id)){ toast('Thẻ này đã được kết nối','tip'); return; }
+  if(!selA){ selA=id; }
+  else if(!selB && id!==selA){ selB=id; showRelOptions(); }
+  else { selA=id; selB=null; selRel=null; }
+  document.querySelectorAll('.pool-tag:not(.used)').forEach(t=>t.classList.remove('sel-a','sel-b'));
+  if(selA){ const el=document.getElementById('pt-'+selA); if(el) el.classList.add('sel-a'); }
+  if(selB){ const el=document.getElementById('pt-'+selB); if(el) el.classList.add('sel-b'); }
+  const csA=document.getElementById('cs-a'),csB=document.getElementById('cs-b');
+  if(csA){ csA.className='conn-slot '+(selA?'has-a':''); csA.textContent=selA?(DISCOVERY_CARDS.find(c=>c.id===selA)?.label||selA):'Thẻ thứ nhất (màu vàng)'; }
+  if(csB){ csB.className='conn-slot '+(selB?'has-b':''); csB.textContent=selB?(DISCOVERY_CARDS.find(c=>c.id===selB)?.label||selB):'Thẻ thứ hai (màu tím)'; }
+  const btn=document.getElementById('conn-confirm-btn'); if(btn) btn.disabled=!(selA&&selB&&selRel);
+}
 
-      function goTo(n) {
-        document.querySelectorAll(".screen").forEach(function (s) {
-          s.classList.remove("active");
-        });
-        document.getElementById("s" + n).classList.add("active");
-        document.getElementById("prog").style.width =
-          (n === 0 ? 0 : n === 1 ? 20 : n === 2 ? 45 : n === 3 ? 70 : 100) +
-          "%";
-        window.scrollTo(0, 0);
-        if (n >= 1 && n <= 3) startTimer(n);
-      }
+function showRelOptions(){
+  const correct = CONNECTIONS.find(c=>(c.a===selA&&c.b===selB)||(c.a===selB&&c.b===selA));
+  const allRels = CONNECTIONS.map(c=>c.rel);
+  const correctRel = correct?.rel || null;
+  const wrongs = allRels.filter(r=>r!==correctRel).sort(()=>Math.random()-.5).slice(0,3);
+  const opts = correctRel ? shuffle([correctRel,...wrongs]) : shuffle(wrongs.slice(0,4));
+  const rel=document.getElementById('rel-area');
+  if(!rel) return;
+  rel.innerHTML=`<div style="font-size:12px;color:var(--txt2);margin:8px 0 4px">Mối quan hệ giữa hai thẻ này là gì?</div>
+  <div class="rel-grid">${opts.map(o=>`<button class="rel-btn" onclick="pickRel(this,'${encodeURIComponent(o)}')">${o}</button>`).join('')}</div>`;
+  selRel=null;
+  const btn=document.getElementById('conn-confirm-btn'); if(btn) btn.disabled=true;
+}
 
-      function startTimer(n) {
-        if (timers[n]) return;
-        var secs = 300,
-          el = document.getElementById("t" + n);
-        timers[n] = setInterval(function () {
-          secs--;
-          var m = Math.floor(secs / 60),
-            s = secs % 60;
-          el.textContent =
-            "⏱ " +
-            String(m).padStart(2, "0") +
-            ":" +
-            String(s).padStart(2, "0");
-          if (secs <= 60) el.classList.add("warn");
-          else el.classList.remove("warn");
-          if (secs <= 0) {
-            clearInterval(timers[n]);
-            el.textContent = "⏱ 00:00";
-          }
-        }, 1000);
-      }
+function pickRel(el,enc){
+  selRel=decodeURIComponent(enc);
+  document.querySelectorAll('.rel-btn').forEach(b=>b.classList.remove('picked'));
+  el.classList.add('picked');
+  const btn=document.getElementById('conn-confirm-btn'); if(btn) btn.disabled=false;
+}
 
-      function revealClue(ch, num) {
-        if (num !== clueState[ch] + 1) return;
-        clueState[ch] = num;
-        // Hide button, show reveal
-        document.getElementById("cb" + ch + "_" + num).style.display = "none";
-        document.getElementById("cr" + ch + "_" + num).classList.add("on");
-        // Enable next clue button
-        var nextBtn = document.getElementById("cb" + ch + "_" + (num + 1));
-        if (nextBtn) nextBtn.removeAttribute("disabled");
-        // If all 3 clues revealed, show answer and enable next
-        if (num === 3) {
-          document.getElementById("a" + ch).classList.add("on");
-          document.getElementById("n" + ch).classList.add("on");
-        }
-      }
+function confirmConn(){
+  if(!selA||!selB||!selRel){ toast('Hãy chọn đủ 2 thẻ và mối quan hệ','bad'); return; }
+  const g = grp();
+  const correct = CONNECTIONS.find(c=>(c.a===selA&&c.b===selB)||(c.a===selB&&c.b===selA));
+  const ok = correct && correct.rel===selRel;
+  const pts = ok ? (correct.pts||10) : -5;
+  addScore(pts, ok?'Kết nối đúng':'Kết nối sai');
+  ok ? g.correct++ : g.wrong++;
+  g.connections.push({a:selA,b:selB,rel:selRel,ok,pts});
+  g.lastActivity = ok ? 'Kết nối đúng: +'+pts+' đ' : 'Kết nối sai: -5 đ';
+  toast(ok?`+${pts} điểm! Kết nối chính xác!`:`-5 điểm. Xem lại mối quan hệ này.`, ok?'ok':'bad');
+  selA=null; selB=null; selRel=null;
+  updateScoreDisplay();
+  renderStage();
+}
 
-      function restart() {
-        clueState = { 1: 0, 2: 0, 3: 0 };
-        timers = {};
-        // Reset UI
-        [1, 2, 3].forEach(function (ch) {
-          [1, 2, 3].forEach(function (n) {
-            var btn = document.getElementById("cb" + ch + "_" + n);
-            if (btn) {
-              btn.style.display = "";
-              if (n > 1) btn.setAttribute("disabled", "");
-            }
-            var rev = document.getElementById("cr" + ch + "_" + n);
-            if (rev) rev.classList.remove("on");
-          });
-          var a = document.getElementById("a" + ch);
-          if (a) a.classList.remove("on");
-          var nb = document.getElementById("n" + ch);
-          if (nb) nb.classList.remove("on");
-          var td = document.getElementById("t" + ch);
-          if (td) td.textContent = "⏱ 05:00";
-          td && td.classList.remove("warn");
-        });
-        document.getElementById("grpNum").value = "";
-        document.getElementById("m1").value = "";
-        document.getElementById("m2").value = "";
-        document.getElementById("m3").value = "";
-        goTo(0);
-      }
-    </script>
-  </body>
+function clearConn(){ selA=null; selB=null; selRel=null; renderStage(); }
+
+function finishStage2(){
+  const g = grp();
+  if(g.connections.length<3){ toast('Hãy thực hiện ít nhất 3 kết nối!','bad'); return; }
+  addScore(15,'Hoàn thành giai đoạn 2');
+  g.stage=2; g.lastActivity='Sang giai đoạn 3: Sơ đồ';
+  toast('+15 điểm! Chuyển sang giai đoạn 3','pts');
+  selA=null; selB=null; selRel=null;
+  setTimeout(renderStage,400);
+}
+
+function shuffle(a){ return a.sort(()=>Math.random()-.5); }
+
+// ── STAGE 3: Mindmap ──
+let mmDrag=null, mmOffset={x:0,y:0};
+
+function renderStage3(main){
+  const g = grp();
+  const placed = g.mmNodes||[];
+  const placedIds = placed.map(n=>n.id);
+  const nodes = DISCOVERY_CARDS.filter(c=>c.type!=='wrong');
+
+  main.innerHTML += `<div class="card">
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px"><i class="ti ti-topology-ring" style="color:var(--green)" aria-hidden="true"></i> Kéo các khái niệm vào sơ đồ và sắp xếp chúng có logic</div>
+    <div style="font-size:12px;color:var(--txt2);margin-bottom:10px">Nhấn vào khái niệm bên dưới để thêm vào sơ đồ, rồi kéo sắp xếp trong canvas.</div>
+    <div class="mm-node-list" id="mm-nodes">${nodes.map(n=>`<div class="mm-node type-${n.type} ${placedIds.includes(n.id)?'placed':''}" onclick="addMmNode('${n.id}')" id="mmn-${n.id}">
+      <i class="ti ${n.icon}" aria-hidden="true"></i> ${n.label}
+    </div>`).join('')}</div>
+  </div>`;
+
+  main.innerHTML += `<div class="card">
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px">Sơ đồ tư duy của nhóm ${g.name}</div>
+    <div class="mm-canvas" id="mm-canvas" style="height:280px">
+      <svg id="mm-svg"></svg>
+      <div id="mm-placed"></div>
+    </div>
+    ${placed.length>=4?`<button class="btn btn-primary btn-sm" onclick="finishStage3()" style="margin-top:10px"><i class="ti ti-arrow-right" aria-hidden="true"></i> Tiếp theo</button>`:'<div style="font-size:12px;color:var(--txt3);margin-top:8px">Thêm ít nhất 4 khái niệm vào sơ đồ để tiếp tục.</div>'}
+  </div>`;
+
+  renderMmCanvas();
+  setupMmDrag();
+}
+
+function addMmNode(id){
+  const g = grp();
+  if((g.mmNodes||[]).find(n=>n.id===id)) return;
+  if(!g.mmNodes) g.mmNodes=[];
+  const canvas = document.getElementById('mm-canvas');
+  const W = canvas?canvas.offsetWidth:400, H = canvas?canvas.offsetHeight:280;
+  g.mmNodes.push({id, x: 40+Math.random()*(W-120), y: 40+Math.random()*(H-80)});
+  document.getElementById('mmn-'+id)?.classList.add('placed');
+  addScore(3,'Thêm node vào sơ đồ');
+  updateScoreDisplay();
+  renderMmCanvas();
+  if(g.mmNodes.length>=4 && !document.querySelector('[onclick="finishStage3()"]')){
+    renderStage();
+  }
+  g.lastActivity='Đang xây sơ đồ tư duy ('+g.mmNodes.length+' nodes)';
+}
+
+function renderMmCanvas(){
+  const g = grp();
+  const placed = g.mmNodes||[];
+  const pEl = document.getElementById('mm-placed');
+  const svg = document.getElementById('mm-svg');
+  if(!pEl||!svg) return;
+  pEl.innerHTML='';
+  placed.forEach(n=>{
+    const card = DISCOVERY_CARDS.find(c=>c.id===n.id);
+    if(!card) return;
+    const div = document.createElement('div');
+    div.className=`mm-placed-node type-${card.type}`;
+    div.textContent=card.label.length>20?card.label.slice(0,18)+'…':card.label;
+    div.id='mnp-'+n.id;
+    div.style.cssText=`left:${n.x}px;top:${n.y}px`;
+    div.addEventListener('mousedown',e=>startMmDrag(e,n.id));
+    div.addEventListener('touchstart',e=>startMmDrag(e,n.id),{passive:true});
+    pEl.appendChild(div);
+  });
+  // Draw SVG connections based on group's confirmed connections
+  const correctConns = (g.connections||[]).filter(c=>c.ok);
+  let svgHtml='';
+  correctConns.forEach(conn=>{
+    const nA=placed.find(n=>n.id===conn.a), nB=placed.find(n=>n.id===conn.b);
+    if(!nA||!nB) return;
+    const eA=document.getElementById('mnp-'+conn.a), eB=document.getElementById('mnp-'+conn.b);
+    const wA=eA?eA.offsetWidth/2:30, wB=eB?eB.offsetWidth/2:30;
+    svgHtml+=`<line x1="${nA.x+wA}" y1="${nA.y+12}" x2="${nB.x+wB}" y2="${nB.y+12}" stroke="#5b9cf6" stroke-width="1.5" stroke-dasharray="5,3" opacity=".6"/>`;
+  });
+  svg.innerHTML=`<defs><marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#5b9cf6"/></marker></defs>${svgHtml}`;
+}
+
+function setupMmDrag(){
+  const canvas=document.getElementById('mm-canvas');
+  if(!canvas) return;
+  function move(e){
+    if(!mmDrag) return;
+    const r=canvas.getBoundingClientRect();
+    const cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left-mmOffset.x;
+    const cy=(e.touches?e.touches[0].clientY:e.clientY)-r.top-mmOffset.y;
+    const g=grp(), n=g.mmNodes.find(x=>x.id===mmDrag);
+    if(n){ n.x=Math.max(0,Math.min(cx,r.width-60)); n.y=Math.max(0,Math.min(cy,r.height-30)); }
+    const el=document.getElementById('mnp-'+mmDrag);
+    if(el) el.style.cssText=`left:${grp().mmNodes.find(x=>x.id===mmDrag)?.x||0}px;top:${grp().mmNodes.find(x=>x.id===mmDrag)?.y||0}px`;
+    renderMmCanvas();
+  }
+  function up(){ mmDrag=null; }
+  canvas.addEventListener('mousemove',move); canvas.addEventListener('mouseup',up);
+  canvas.addEventListener('touchmove',e=>move(e),{passive:true}); canvas.addEventListener('touchend',up);
+}
+
+function startMmDrag(e,id){
+  mmDrag=id;
+  const el=document.getElementById('mnp-'+id);
+  if(!el) return;
+  const r=el.getBoundingClientRect();
+  const cx=e.touches?e.touches[0].clientX:e.clientX;
+  const cy=e.touches?e.touches[0].clientY:e.clientY;
+  mmOffset={x:cx-r.left,y:cy-r.top};
+}
+
+function finishStage3(){
+  const g=grp();
+  if((g.mmNodes||[]).length<4){ toast('Hãy thêm ít nhất 4 khái niệm!','bad'); return; }
+  addScore(20,'Hoàn thành sơ đồ tư duy');
+  g.stage=3; g.lastActivity='Sang giai đoạn 4: Chốt kiến thức';
+  toast('+20 điểm! Chuyển sang giai đoạn cuối','pts');
+  setTimeout(renderStage,400);
+}
+
+// ── STAGE 4: Fill Blanks ──
+let fillAnswers=[];
+
+function renderStage4(main){
+  const g=grp();
+  if(!fillAnswers.length) fillAnswers=FILL_BLANKS.map(()=>({a1:null,a2:null,done:false}));
+
+  main.innerHTML+=`<div class="fill-box">
+    <div style="font-size:13px;font-weight:600;margin-bottom:4px"><i class="ti ti-pencil" style="color:var(--purple)" aria-hidden="true"></i> Hoàn thành câu định nghĩa – chốt kiến thức</div>
+    <div style="font-size:12px;color:var(--txt2);margin-bottom:10px">Nhấn vào chỗ trống, sau đó chọn từ phù hợp từ danh sách.</div>
+    <div id="fill-area"></div>
+    ${g.fillDone.length>=FILL_BLANKS.length?`<button class="btn btn-primary" onclick="finishStage4()" style="margin-top:12px"><i class="ti ti-podium" aria-hidden="true"></i> Hoàn thành & Xem kết quả</button>`:''}
+  </div>`;
+  renderFillArea();
+}
+
+let activeFill={q:-1,b:-1};
+function renderFillArea(){
+  const g=grp();
+  const area=document.getElementById('fill-area');
+  if(!area) return;
+  area.innerHTML='';
+  FILL_BLANKS.forEach((fb,qi)=>{
+    const done=g.fillDone.includes(qi);
+    const fa=fillAnswers[qi]||{a1:null,a2:null};
+    let sent=fb.sentence;
+    sent=sent.replace('[___1___]',`<span class="fill-blank ${fa.a1?'':'empty'}" onclick="activateBlank(${qi},0)" style="${fa.a1?'border-color:var(--green);background:var(--green-bg);color:var(--green)':''}">${fa.a1||'___1___'}</span>`);
+    sent=sent.replace('[___2___]',`<span class="fill-blank ${fa.a2?'':'empty'}" onclick="activateBlank(${qi},1)" style="${fa.a2?'border-color:var(--green);background:var(--green-bg);color:var(--green)':''}">${fa.a2||'___2___'}</span>`);
+    area.innerHTML+=`<div style="margin-bottom:16px">
+      <div class="fill-sentence">${qi+1}. ${sent}</div>
+      <div id="blank-opts-${qi}" style="display:none">
+        <div class="blank-opts">${fb.opts.map(o=>`<span class="blank-chip" onclick="pickBlank(${qi},'${encodeURIComponent(o)}')">${o}</span>`).join('')}</div>
+        <button class="btn btn-primary btn-sm" onclick="submitFill(${qi})" style="margin-top:4px">Kiểm tra</button>
+      </div>
+      ${done?`<div class="alert alert-success" style="margin-top:6px;font-size:12px"><i class="ti ti-check" aria-hidden="true"></i> Đúng! +15 điểm</div>`:''}
+    </div>`;
+  });
+}
+
+function activateBlank(qi,bi){
+  activeFill={q:qi,b:bi};
+  document.querySelectorAll('[id^="blank-opts-"]').forEach((el,i)=>el.style.display=i===qi?'block':'none');
+}
+
+function pickBlank(qi,enc){
+  const val=decodeURIComponent(enc);
+  if(!fillAnswers[qi]) fillAnswers[qi]={a1:null,a2:null};
+  if(activeFill.b===0) fillAnswers[qi].a1=val;
+  else fillAnswers[qi].a2=val;
+  renderFillArea();
+  activateBlank(qi,activeFill.b);
+}
+
+function submitFill(qi){
+  const g=grp();
+  if(g.fillDone.includes(qi)){ toast('Câu này đã làm rồi!','tip'); return; }
+  const fa=fillAnswers[qi]; const fb=FILL_BLANKS[qi];
+  const ok1=fa?.a1===fb.blanks[0], ok2=fa?.a2===fb.blanks[1];
+  if(ok1&&ok2){
+    addScore(15,'Điền đúng câu '+( qi+1));
+    g.correct++; g.fillDone.push(qi);
+    toast('+15 điểm! Hoàn toàn chính xác!','ok');
+    updateScoreDisplay();
+    renderFillArea();
+    if(g.fillDone.length>=FILL_BLANKS.length){
+      renderStage(); // re-render to show finish button
+    }
+    g.lastActivity='Điền đúng câu '+(qi+1);
+  } else {
+    addScore(-5,'Điền sai câu '+(qi+1));
+    g.wrong++;
+    toast('-5 điểm. Hãy thử lại!','bad');
+    updateScoreDisplay();
+    g.lastActivity='Điền sai câu '+(qi+1);
+  }
+}
+
+function finishStage4(){
+  const g=grp();
+  addScore(30,'Hoàn thành toàn bộ trò chơi');
+  toast('+30 điểm bonus! Xuất sắc! Đang xem kết quả…','pts');
+  g.lastActivity='Đã hoàn thành!';
+  setTimeout(showResults,1200);
+}
+
+// ══════════════════════════════════════════
+//  SCORING
+// ══════════════════════════════════════════
+function addScore(pts, reason){
+  const g=grp();
+  g.score=Math.max(0,g.score+pts);
+}
+
+// ══════════════════════════════════════════
+//  SIDEBAR HELPERS
+// ══════════════════════════════════════════
+function renderStageSidebar(){
+  const g=grp();
+  const steps=document.getElementById('stage-steps');
+  if(!steps) return;
+  steps.innerHTML=STAGES.map((s,i)=>{
+    const cls=i<g.stage?'done':i===g.stage?'active':'';
+    return `<div class="stage-step ${cls}">
+      <span class="stage-dot ${i<g.stage?'done':i===g.stage?'active':'todo'}"></span>
+      <span>${s.name}</span>
+      ${i<g.stage?'<i class="ti ti-check" style="margin-left:auto;font-size:13px;color:var(--green)" aria-hidden="true"></i>':''}
+    </div>`;
+  }).join('');
+}
+
+function renderMiniLeaderboard(){
+  const lb=document.getElementById('mini-lb');
+  if(!lb) return;
+  const sorted=[...allGroups()].sort((a,b)=>b.score-a.score);
+  const max=Math.max(...sorted.map(g=>g.score),1);
+  lb.innerHTML=sorted.slice(0,7).map((g,i)=>{
+    const rnkCls=i===0?'g':i===1?'s':i===2?'b':'';
+    const isMe=g.id===STATE.currentGroup;
+    return `<div class="mlb-row ${isMe?'me':''}">
+      <div class="mlb-rank ${rnkCls}">${i+1}</div>
+      <div class="mlb-name" title="${g.name}">${g.name}</div>
+      <div class="mlb-pts">${g.score}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+//  TEACHER VIEW
+// ══════════════════════════════════════════
+function renderTeacher(){
+  renderTeacherMain();
+  renderTeacherScoreboard();
+  renderTeacherAttention();
+  renderTeacherPhaseCtrl();
+}
+
+function renderTeacherMain(){
+  const main=document.getElementById('teacher-main');
+  if(!main) return;
+  main.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px">
+    ${allGroups().map(g=>{
+      const stageInfo=STAGES[g.stage]||STAGES[0];
+      const progSegs=STAGES.map((_,i)=>`<div class="gmc-prog-seg ${i<g.stage?'done':i===g.stage?'active':'todo'}"></div>`).join('');
+      return `<div class="group-monitor-card">
+        <div class="gmc-head">
+          <div>
+            <div class="gmc-name">${g.name}</div>
+            <div class="gmc-stage">Giai đoạn ${g.stage+1}: ${stageInfo.name}</div>
+          </div>
+          <div class="gmc-pts">${g.score} đ</div>
+        </div>
+        <div class="gmc-progress">${progSegs}</div>
+        <div class="gmc-stats">
+          <span class="gmc-stat info"><i class="ti ti-cards" aria-hidden="true"></i> ${g.flipped.length}/${DISCOVERY_CARDS.length} thẻ</span>
+          <span class="gmc-stat ok"><i class="ti ti-check" aria-hidden="true"></i> ${g.correct} đúng</span>
+          <span class="gmc-stat bad"><i class="ti ti-x" aria-hidden="true"></i> ${g.wrong} sai</span>
+          <span class="gmc-stat info"><i class="ti ti-link" aria-hidden="true"></i> ${g.connections.length} kết nối</span>
+        </div>
+        <div class="gmc-activity">${g.lastActivity}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function renderTeacherScoreboard(){
+  const sb=document.getElementById('t-scoreboard');
+  if(!sb) return;
+  const sorted=[...allGroups()].sort((a,b)=>b.score-a.score);
+  const max=Math.max(...sorted.map(g=>g.score),1);
+  sb.innerHTML=sorted.map((g,i)=>{
+    const rnkCls=i===0?'g':i===1?'s':i===2?'b':'';
+    return `<div class="tsb-row">
+      <div class="mlb-rank ${rnkCls}" style="width:18px;height:18px;font-size:10px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--surf3);color:var(--txt2);flex-shrink:0">${i+1}</div>
+      <div style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px">${g.name}</div>
+      <div class="tsb-bar-wrap"><div class="tsb-bar-fill" style="width:${Math.round(g.score/max*100)}%"></div></div>
+      <div class="tsb-pts">${g.score}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderTeacherAttention(){
+  const att=document.getElementById('t-attention');
+  if(!att) return;
+  const wrongs=allGroups().flatMap(g=>g.connections.filter(c=>!c.ok).map(c=>({gName:g.name,...c})));
+  if(!wrongs.length){ att.innerHTML='<div style="font-size:12px;color:var(--txt3)">Không có kết nối sai nào.</div>'; return; }
+  att.innerHTML=wrongs.slice(-5).map(w=>{
+    const cA=DISCOVERY_CARDS.find(c=>c.id===w.a),cB=DISCOVERY_CARDS.find(c=>c.id===w.b);
+    return `<div class="att-item"><strong>${w.gName}:</strong> ${cA?.label.slice(0,16)||'?'}… ↔ ${cB?.label.slice(0,16)||'?'}…</div>`;
+  }).join('');
+}
+
+function renderTeacherPhaseCtrl(){
+  const pn=document.getElementById('t-phase-name'),pd=document.getElementById('t-phase-desc');
+  if(pn) pn.textContent='Giai đoạn '+(STATE.globalPhase+1)+': '+(STAGES[STATE.globalPhase]?.name||'');
+  if(pd) pd.textContent=PHASE_TEACHER_DESCS[STATE.globalPhase]||'';
+}
+
+function teacherNextPhase(){
+  if(STATE.globalPhase<3){ STATE.globalPhase++; renderTeacherPhaseCtrl(); toast('Chuyển sang '+STAGES[STATE.globalPhase].name,'tip'); }
+  else toast('Đây là giai đoạn cuối. Nhấn "Kết thúc" để xem kết quả.','tip');
+}
+
+function teacherRevealAll(){
+  allGroups().forEach(g=>{ g.flipped=DISCOVERY_CARDS.map(c=>c.id); g.lastActivity='GV lật hết thẻ'; });
+  toast('Đã lật hết thẻ cho tất cả nhóm','ok');
+  renderTeacher();
+}
+
+function teacherResetAll(){
+  if(!confirm('Reset toàn bộ dữ liệu các nhóm?')) return;
+  Object.keys(STATE.groups).forEach(k=>{
+    STATE.groups[k]={id:+k,name:'Nhóm '+k,stage:0,score:0,correct:0,wrong:0,flipped:[],connections:[],quizDone:[],fillDone:[],lastActivity:'Chưa bắt đầu',mmNodes:[]};
+  });
+  fillAnswers=[];
+  toast('Đã reset tất cả nhóm','ok');
+  renderTeacher();
+}
+
+// ══════════════════════════════════════════
+//  RESULTS
+// ══════════════════════════════════════════
+function showResults(){
+  show('p-results');
+  const sorted=[...allGroups()].sort((a,b)=>b.score-a.score);
+  // Podium
+  const podium=document.getElementById('res-podium');
+  const order=sorted.length>=3?[sorted[1],sorted[0],sorted[2]]:sorted;
+  const cls=sorted.length>=3?['p2','p1','p3']:['p1'];
+  const icons=['ti-medal','ti-trophy','ti-medal'];
+  podium.innerHTML=order.map((g,i)=>`<div class="pod-slot">
+    <div class="pod-label">${g?.name||'—'}</div>
+    <div class="pod-box ${cls[i]||'p1'}">
+      <i class="ti ${icons[i]}" aria-hidden="true" class="pod-icon"></i>
+      <div class="pod-num">${g?.score||0}</div>
+    </div>
+  </div>`).join('');
+  // Table
+  const rows=document.getElementById('res-rows');
+  rows.innerHTML=sorted.map((g,i)=>`<div class="rt-row">
+    <div class="rt-rnk">${i+1}</div>
+    <div>${g.name}</div>
+    <div class="rt-pts">${g.score}</div>
+    <div class="rt-ok">${g.correct}</div>
+    <div class="rt-bad">${g.wrong}</div>
+    <div class="rt-stg">${g.stage}/4</div>
+  </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════
+function toast(msg,type='tip'){
+  const c=document.getElementById('toasts');
+  const t=document.createElement('div');
+  t.className='toast '+type;
+  const icons={ok:'ti-check',bad:'ti-x',tip:'ti-info-circle',pts:'ti-star'};
+  t.innerHTML=`<i class="ti ${icons[type]||'ti-info-circle'}" aria-hidden="true"></i><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(20px)'; t.style.transition='all .3s'; setTimeout(()=>t.remove(),320); },2600);
+}
+
+initGroups();
+</script>
+</body>
 </html>
