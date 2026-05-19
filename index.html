@@ -3696,6 +3696,12 @@
         document.getElementById("game-bar").style.display = "none";
         document.getElementById("stage-dots-bar").style.display = "none";
         showScreen("s-complete");
+
+          // Sau 3 giây tự hiện BXH
+          setTimeout(() => {
+            renderLeaderboard();
+            showScreen("s-leaderboard");
+          }, 3000);
         document.getElementById("s-complete").style.display = "flex";
 
         // Save final to teacher storage
@@ -3873,13 +3879,34 @@
             "gmtx_progress_" + slugify(state.groupName),
             JSON.stringify(data),
           );
-          // Also update teacher table if group exists
-          const existing = teacherGroups.find(
+          // Tự động lưu dữ liệu nhóm vào chế độ giáo viên
+          let existing = teacherGroups.find(
             (g) => g.name === state.groupName,
           );
+
+          // Nếu nhóm chưa tồn tại thì tự tạo mới
+          if (!existing && state.groupName) {
+            existing = {
+              name: state.groupName,
+              scores: { c1: 0, c2: 0, c3: 0, c4: 0 },
+              bonus: 0,
+              complete: false,
+            };
+
+            teacherGroups.push(existing);
+          }
+
+          // Cập nhật điểm từng chặng
           if (existing) {
             existing.scores = { ...state.scores };
             existing.complete = complete;
+
+            // Lưu tổng điểm cuối cùng để dùng cho BXH
+            existing.finalTotal = finalTotal;
+
+            // Lưu thời gian hoàn thành
+            existing.finishedAt = Date.now();
+
             saveTeacherData();
           }
         } catch (e) {}
