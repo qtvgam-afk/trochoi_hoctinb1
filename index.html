@@ -1940,7 +1940,7 @@
         <div class="gb-stage" id="gb-stage-name">Chặng 1 — Thu nhận</div>
       </div>
       <div class="gb-score-pill">⚡ <span id="gb-score">0</span> điểm</div>
-      <div class="gb-timer" id="gb-timer">25:00</div>
+      <div class="gb-timer" id="gb-timer">10:00</div>
       <button class="gb-sos" onclick="showSOS()" id="sos-btn">
         🆘 Cầu cứu (<span id="sos-count">2</span>)
       </button>
@@ -3206,7 +3206,7 @@
 
       function updateTimer() {
         const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
-        const left = Math.max(0, 25 * 60 - elapsed);
+        const left = Math.max(0, 10 * 60 - elapsed);
         const m = Math.floor(left / 60),
           s = left % 60;
         const el = document.getElementById("gb-timer");
@@ -3214,7 +3214,7 @@
         el.className = "gb-timer" + (left < 120 ? " urgent" : "");
         if (left === 0 && state.timerInterval) {
           clearInterval(state.timerInterval);
-          showToast("⏰ Hết 25 phút! Nộp bài ngay!", "error");
+          showToast("⏰ Hết 10 phút! Nộp bài ngay!", "error");
         }
       }
 
