@@ -1316,6 +1316,201 @@
         min-height: 1.2rem;
       }
 
+      /* ── TEACHER TIMER ─── */
+      .teacher-timer-bar {
+        background: linear-gradient(135deg, #0f172a, #1e3a5f);
+        border-bottom: 2px solid rgba(0,200,150,.25);
+        padding: .75rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        flex-wrap: wrap;
+      }
+      .teacher-timer-label {
+        color: rgba(255,255,255,.6);
+        font-size: .82rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+      }
+      .teacher-timer-display {
+        font-family: 'Exo 2', sans-serif;
+        font-weight: 900;
+        font-size: 2rem;
+        color: #fff;
+        background: rgba(255,255,255,.07);
+        border: 1.5px solid rgba(0,200,150,.3);
+        border-radius: 10px;
+        padding: .25rem .9rem;
+        min-width: 120px;
+        text-align: center;
+        letter-spacing: .04em;
+        transition: color .3s, border-color .3s;
+      }
+      .teacher-timer-display.urgent {
+        color: #fca5a5;
+        border-color: rgba(239,68,68,.5);
+        animation: pulse 1s infinite;
+      }
+      .teacher-timer-display.ended {
+        color: #fca5a5;
+        border-color: rgba(239,68,68,.6);
+        background: rgba(239,68,68,.12);
+      }
+      .teacher-timer-progress {
+        flex: 1;
+        min-width: 120px;
+        height: 8px;
+        background: rgba(255,255,255,.1);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+      .teacher-timer-fill {
+        height: 100%;
+        background: var(--teal);
+        border-radius: 999px;
+        transition: width .8s linear, background .3s;
+      }
+      .teacher-timer-fill.urgent { background: #f87171; }
+
+      /* ── GROUP OBSERVATION PANEL ─── */
+      .obs-tabs {
+        display: flex;
+        gap: 0;
+        border-bottom: 2px solid var(--border);
+        background: var(--card);
+        padding: 0 1.5rem;
+        overflow-x: auto;
+      }
+      .obs-tab {
+        padding: .65rem 1.25rem;
+        font-size: .85rem;
+        font-weight: 700;
+        color: var(--mu);
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        white-space: nowrap;
+        background: none;
+        border-top: none;
+        border-left: none;
+        border-right: none;
+        font-family: inherit;
+        transition: all .2s;
+      }
+      .obs-tab:hover { color: var(--g2); }
+      .obs-tab.active {
+        color: var(--g2);
+        border-bottom-color: var(--g2);
+      }
+      .obs-panel { display: none; }
+      .obs-panel.active { display: block; }
+
+      .group-obs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 1rem;
+        padding: 1.25rem 0;
+      }
+      .group-obs-card {
+        background: var(--card);
+        border: 1.5px solid var(--border);
+        border-radius: var(--ra);
+        padding: 1rem;
+        box-shadow: var(--shadow);
+        transition: border-color .2s, box-shadow .2s;
+        position: relative;
+        overflow: hidden;
+      }
+      .group-obs-card.complete {
+        border-color: var(--teal);
+        background: #f0fdf4;
+      }
+      .group-obs-card.playing {
+        border-color: var(--c1);
+      }
+      .group-obs-name {
+        font-family: 'Exo 2', sans-serif;
+        font-weight: 800;
+        font-size: 1rem;
+        margin-bottom: .35rem;
+        display: flex;
+        align-items: center;
+        gap: .4rem;
+      }
+      .group-obs-stage {
+        font-size: .75rem;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 999px;
+        margin-bottom: .6rem;
+        display: inline-block;
+      }
+      .obs-stage-wait { background: #fef3c7; color: #92400e; }
+      .obs-stage-c1 { background: var(--c1bg); color: var(--c1d); }
+      .obs-stage-c2 { background: var(--c2bg); color: var(--c2d); }
+      .obs-stage-c3 { background: var(--c3bg); color: var(--c3d); }
+      .obs-stage-c4 { background: var(--c4bg); color: var(--c4d); }
+      .obs-stage-done { background: #d1fae5; color: var(--g1); }
+      .group-obs-scores {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 4px;
+        margin: .4rem 0;
+      }
+      .group-obs-score-cell {
+        text-align: center;
+        background: var(--bg);
+        border-radius: 6px;
+        padding: 4px 2px;
+      }
+      .group-obs-score-cell .sc-label {
+        font-size: .6rem;
+        color: var(--mu);
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .group-obs-score-cell .sc-val {
+        font-family: 'Exo 2', sans-serif;
+        font-weight: 800;
+        font-size: .95rem;
+        color: var(--g1);
+      }
+      .group-obs-total {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: .5rem;
+        padding-top: .5rem;
+        border-top: 1px solid var(--border);
+      }
+      .group-obs-total-label { font-size: .78rem; color: var(--mu); }
+      .group-obs-total-val {
+        font-family: 'Exo 2', sans-serif;
+        font-weight: 900;
+        font-size: 1.4rem;
+        color: var(--g1);
+      }
+      .group-obs-hint {
+        font-size: .72rem;
+        color: var(--mu);
+        margin-top: .25rem;
+      }
+      .obs-live-dot {
+        display: inline-block;
+        width: 7px; height: 7px;
+        background: #22c55e;
+        border-radius: 50%;
+        animation: pulse 1s infinite;
+        margin-left: 2px;
+        flex-shrink: 0;
+      }
+      .obs-empty {
+        text-align: center;
+        color: var(--mu);
+        padding: 3rem 1rem;
+        font-size: .95rem;
+      }
+
       /* ── TEACHER DASHBOARD ─── */
       #s-teacher-dash.active {
         display: block;
@@ -2889,6 +3084,28 @@
         <span id="game-status-text">Trò chơi <strong>chưa bắt đầu</strong> — Học sinh chưa thể chơi. Nhấn <em>Bắt đầu</em> để mở trò chơi cho các nhóm.</span>
       </div>
 
+      <!-- ⏱ Teacher Game Timer -->
+      <div id="teacher-timer-bar" class="teacher-timer-bar" style="display:none">
+        <div>
+          <div class="teacher-timer-label">⏱ Thời gian trò chơi</div>
+          <div class="teacher-timer-display" id="teacher-timer-display">20:00</div>
+        </div>
+        <div class="teacher-timer-progress">
+          <div class="teacher-timer-fill" id="teacher-timer-fill" style="width:100%"></div>
+        </div>
+        <div style="color:rgba(255,255,255,.55);font-size:.8rem;white-space:nowrap">
+          Tổng: <strong id="teacher-timer-total-label" style="color:#fff">20 phút</strong>
+        </div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <select id="teacher-timer-select" class="btn btn-ghost btn-sm" style="color:#fff;border-color:rgba(255,255,255,.3);background:transparent;font-family:inherit" onchange="setTeacherTimerDuration(this.value)">
+            <option value="1200">20 phút</option>
+            <option value="1500">25 phút</option>
+            <option value="1800">30 phút</option>
+            <option value="600">10 phút (test)</option>
+          </select>
+        </div>
+      </div>
+
       <!-- Live waiting room monitor -->
       <div id="teacher-live-monitor" style="
         background: linear-gradient(135deg,#022c1e,#065f46);
@@ -2918,7 +3135,15 @@
       </div>
 
       <div class="wrap-wide">
-        <div class="sec-title">Thêm Nhóm Học Sinh</div>
+        <!-- ── TABS ── -->
+        <div class="obs-tabs">
+          <button class="obs-tab active" onclick="switchDashTab('tab-manage')">📋 Quản lý nhóm</button>
+          <button class="obs-tab" onclick="switchDashTab('tab-observe')">👁 Quan sát màn hình nhóm <span id="obs-live-badge" style="display:none;background:#22c55e;color:#fff;font-size:.65rem;padding:2px 7px;border-radius:999px;font-weight:700;margin-left:4px">LIVE</span></button>
+        </div>
+
+        <!-- ── TAB: MANAGE ── -->
+        <div id="tab-manage" class="obs-panel active">
+        <div class="sec-title" style="margin-top:1.25rem">Thêm Nhóm Học Sinh</div>
         <div class="tg-add">
           <div class="form-group">
             <label>Tên Nhóm</label>
@@ -3225,6 +3450,22 @@
             </tbody>
           </table>
         </div>
+        </div><!-- end #tab-manage -->
+
+        <!-- ── TAB: OBSERVE ── -->
+        <div id="tab-observe" class="obs-panel">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin: 1rem 0 .5rem;flex-wrap:wrap;gap:.5rem">
+            <div class="sec-title" style="margin:0">👁 Màn hình các nhóm đang chơi</div>
+            <div style="display:flex;gap:.5rem;align-items:center">
+              <span id="obs-group-count" style="font-size:.8rem;color:var(--mu)">0 nhóm</span>
+              <button class="btn btn-ghost btn-sm" onclick="refreshGroupObservation()">🔄 Làm mới</button>
+            </div>
+          </div>
+          <div id="group-obs-grid" class="group-obs-grid">
+            <div class="obs-empty">⏳ Chưa có nhóm nào đang chơi.<br>Nhấn <strong>Bắt đầu</strong> để mở trò chơi.</div>
+          </div>
+        </div><!-- end #tab-observe -->
+
       </div>
     </div>
 
@@ -3567,12 +3808,15 @@
       function teacherStartGame() {
         fbSet('gameStarted', true); fbSet('gameStopped', null);
         updateGameStatusUI();
+        startTeacherTimer();
+        startGroupObsAutoRefresh();
         showToast('✅ Đã mở trò chơi — Học sinh có thể bắt đầu!', 'success');
       }
 
       function teacherStopGame() {
         fbSet('gameStarted', false); fbSet('gameStopped', Date.now());
         updateGameStatusUI();
+        stopTeacherTimer();
         showToast('⏹ Đã dừng trò chơi.', 'error');
         showFinalScoreModal();
       }
@@ -4621,6 +4865,8 @@
             complete,
             finalTotal,
             finishedAt: Date.now(),
+            currentStage: state.currentStage || 1,
+            hintsUsed: state.hintsUsed || 0,
           });
           // Also update local teacherGroups for immediate UI
           let existing = teacherGroups.find(g => g.name === state.groupName);
@@ -4638,6 +4884,167 @@
 
       function slugify(s) {
         return s.toLowerCase().replace(/[^a-z0-9]/g, "_");
+      }
+
+      // ═══════════════════════════════════════════
+      //  TEACHER TIMER
+      // ═══════════════════════════════════════════
+      let _teacherTimerInterval = null;
+      let _teacherTimerStart = null;
+      let _teacherTimerDuration = 1200; // default 20 min in seconds
+
+      function setTeacherTimerDuration(seconds) {
+        _teacherTimerDuration = parseInt(seconds);
+        const label = document.getElementById('teacher-timer-total-label');
+        if (label) label.textContent = Math.round(_teacherTimerDuration / 60) + ' phút';
+        // Save to firebase so all clients know the duration
+        if (typeof fbSet === 'function') fbSet('timerDuration', _teacherTimerDuration);
+      }
+
+      function startTeacherTimer() {
+        _teacherTimerStart = Date.now();
+        fbSet('timerStart', _teacherTimerStart);
+        fbSet('timerDuration', _teacherTimerDuration);
+
+        const bar = document.getElementById('teacher-timer-bar');
+        if (bar) bar.style.display = 'flex';
+
+        if (_teacherTimerInterval) clearInterval(_teacherTimerInterval);
+        _teacherTimerInterval = setInterval(tickTeacherTimer, 500);
+        tickTeacherTimer();
+      }
+
+      function stopTeacherTimer() {
+        if (_teacherTimerInterval) clearInterval(_teacherTimerInterval);
+        _teacherTimerInterval = null;
+        const bar = document.getElementById('teacher-timer-bar');
+        if (bar) bar.style.display = 'none';
+      }
+
+      function tickTeacherTimer() {
+        if (!_teacherTimerStart) return;
+        const elapsed = Math.floor((Date.now() - _teacherTimerStart) / 1000);
+        const left = Math.max(0, _teacherTimerDuration - elapsed);
+        const m = Math.floor(left / 60);
+        const s = left % 60;
+        const pct = (left / _teacherTimerDuration) * 100;
+
+        const disp = document.getElementById('teacher-timer-display');
+        const fill = document.getElementById('teacher-timer-fill');
+        if (disp) {
+          disp.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+          disp.className = 'teacher-timer-display' + (left === 0 ? ' ended' : left < 120 ? ' urgent' : '');
+        }
+        if (fill) {
+          fill.style.width = pct + '%';
+          fill.className = 'teacher-timer-fill' + (left < 120 ? ' urgent' : '');
+        }
+
+        // Auto-stop when time is up
+        if (left === 0 && _teacherTimerInterval) {
+          clearInterval(_teacherTimerInterval);
+          _teacherTimerInterval = null;
+          showToast('⏰ HẾT GIỜ! Tự động dừng trò chơi!', 'error');
+          teacherStopGame();
+        }
+      }
+
+      // ═══════════════════════════════════════════
+      //  TEACHER DASHBOARD TABS
+      // ═══════════════════════════════════════════
+      function switchDashTab(tabId) {
+        document.querySelectorAll('.obs-tab').forEach((t, i) => {
+          const panels = ['tab-manage', 'tab-observe'];
+          t.classList.toggle('active', panels[i] === tabId);
+        });
+        document.querySelectorAll('.obs-panel').forEach(p => {
+          p.classList.toggle('active', p.id === tabId);
+        });
+        if (tabId === 'tab-observe') {
+          refreshGroupObservation();
+          const badge = document.getElementById('obs-live-badge');
+          if (badge) badge.style.display = 'inline';
+        }
+      }
+
+      // ═══════════════════════════════════════════
+      //  GROUP OBSERVATION
+      // ═══════════════════════════════════════════
+      let _obsRefreshInterval = null;
+
+      function startGroupObsAutoRefresh() {
+        if (_obsRefreshInterval) clearInterval(_obsRefreshInterval);
+        _obsRefreshInterval = setInterval(() => {
+          // Only refresh if observe tab is active
+          if (document.getElementById('tab-observe')?.classList.contains('active')) {
+            refreshGroupObservation();
+          }
+        }, 3000);
+      }
+
+      function stopGroupObsAutoRefresh() {
+        if (_obsRefreshInterval) clearInterval(_obsRefreshInterval);
+        _obsRefreshInterval = null;
+      }
+
+      function refreshGroupObservation() {
+        const grid = document.getElementById('group-obs-grid');
+        if (!grid) return;
+
+        const groups = window.teacherGroups || [];
+        const countEl = document.getElementById('obs-group-count');
+        if (countEl) countEl.textContent = groups.length + ' nhóm';
+
+        if (!groups.length) {
+          grid.innerHTML = '<div class="obs-empty">⏳ Chưa có nhóm nào đang chơi.<br>Nhấn <strong>Bắt đầu</strong> để mở trò chơi.</div>';
+          return;
+        }
+
+        const stageMap = {
+          0: { label: '⏳ Chờ', cls: 'obs-stage-wait' },
+          1: { label: '📡 C1 · Thu nhận', cls: 'obs-stage-c1' },
+          2: { label: '💾 C2 · Lưu trữ', cls: 'obs-stage-c2' },
+          3: { label: '🗂️ C3 · Xử lý', cls: 'obs-stage-c3' },
+          4: { label: '📡 C4 · Truyền tin', cls: 'obs-stage-c4' },
+          5: { label: '✅ Hoàn thành', cls: 'obs-stage-done' },
+        };
+
+        grid.innerHTML = groups.map(g => {
+          const total = (g.scores?.c1||0) + (g.scores?.c2||0) + (g.scores?.c3||0) + (g.scores?.c4||0) + (g.bonus||0);
+          const stageNum = g.complete ? 5 : (g.currentStage || 0);
+          const stage = stageMap[stageNum] || stageMap[0];
+          const isPlaying = stageNum > 0 && stageNum < 5;
+          const hintsLeft = g.hintsUsed != null ? (2 - g.hintsUsed) : '?';
+
+          // Time elapsed since finishedAt or just 'đang chơi'
+          let timeInfo = '';
+          if (g.complete && g.finishedAt) {
+            const mins = Math.round((Date.now() - g.finishedAt) / 60000);
+            timeInfo = `Nộp ${mins < 1 ? 'vừa xong' : mins + ' phút trước'}`;
+          } else if (isPlaying) {
+            timeInfo = 'Đang chơi';
+          }
+
+          return `<div class="group-obs-card ${g.complete ? 'complete' : isPlaying ? 'playing' : ''}">
+            <div class="group-obs-name">
+              ${g.name}
+              ${isPlaying ? '<span class="obs-live-dot"></span>' : ''}
+            </div>
+            <span class="group-obs-stage ${stage.cls}">${stage.label}</span>
+            <div class="group-obs-scores">
+              ${['c1','c2','c3','c4'].map((k,i) => `
+                <div class="group-obs-score-cell">
+                  <div class="sc-label">C${i+1}</div>
+                  <div class="sc-val">${g.scores?.[k] ?? '–'}</div>
+                </div>`).join('')}
+            </div>
+            <div class="group-obs-total">
+              <span class="group-obs-total-label">Tổng điểm${g.bonus ? ' (thưởng: +' + g.bonus + ')' : ''}</span>
+              <span class="group-obs-total-val">${total}</span>
+            </div>
+            <div class="group-obs-hint">🆘 Thẻ cứu còn: ${hintsLeft} · ${timeInfo}</div>
+          </div>`;
+        }).join('');
       }
 
       // ═══════════════════════════════════════════
