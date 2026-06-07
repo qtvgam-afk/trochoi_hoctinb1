@@ -2977,8 +2977,7 @@
             line-height: 1.6;
           "
         >
-          Chờ giáo viên chiếu Bảng Xếp hạng để xem kết quả so với các nhóm khác!
-          🎉
+          Đang tải bảng xếp hạng... 🎉
         </div>
       </div>
     </div>
@@ -3143,33 +3142,38 @@
 
         <!-- ── TAB: MANAGE ── -->
         <div id="tab-manage" class="obs-panel active">
-        <div class="sec-title" style="margin-top:1.25rem">Thêm Nhóm Học Sinh</div>
-        <div class="tg-add">
-          <div class="form-group">
-            <label>Tên Nhóm</label>
-            <input
-              type="text"
-              id="t-group-input"
-              placeholder="VD: Nhóm 1"
-              maxlength="30"
-            />
+
+        <!-- Panel điểm realtime -->
+        <div style="
+          background: linear-gradient(135deg,#f0fdf4,#d1fae5);
+          border: 1.5px solid var(--border2);
+          border-radius: var(--ra);
+          padding: 1rem 1.25rem;
+          margin: 1.25rem 0 1rem;
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          flex-wrap: wrap;
+        ">
+          <div style="flex:1;min-width:200px">
+            <div style="font-family:'Exo 2',sans-serif;font-weight:800;font-size:1rem;color:var(--g1);margin-bottom:.2rem">
+              📊 Điểm được lưu tự động từ học sinh
+            </div>
+            <div style="font-size:.82rem;color:var(--txt2);line-height:1.5">
+              Khi học sinh hoàn thành chặng, điểm sẽ tự động cập nhật lên bảng bên dưới qua Firebase.<br>
+              Nhấn <strong>Chiếu BXH</strong> trên thanh trên để hiển thị bảng xếp hạng toàn màn hình.
+            </div>
           </div>
-          <button class="btn btn-primary" onclick="addTeacherGroup()">
-            + Thêm nhóm
-          </button>
-          <button
-            class="btn btn-ghost btn-sm"
-            onclick="clearAllGroups()"
-            style="color: var(--red); border-color: var(--red)"
-          >
-            🗑️ Xóa tất cả
-          </button>
+          <div style="display:flex;flex-direction:column;gap:.5rem;align-items:flex-end">
+            <button class="btn btn-teal btn-sm" onclick="showLeaderboard()">📊 Chiếu BXH ngay</button>
+            <button class="btn btn-ghost btn-sm" style="color:var(--red);border-color:var(--red)" onclick="clearAllGroups()">🗑️ Xóa tất cả dữ liệu</button>
+          </div>
         </div>
 
         <div class="flex-between" style="margin-bottom: 0.5rem">
-          <div class="sec-title" style="margin: 0">Bảng theo dõi điểm số</div>
+          <div class="sec-title" style="margin: 0">Bảng theo dõi điểm số realtime</div>
           <div style="font-size: 0.78rem; color: var(--mu)">
-            Nhập điểm thủ công hoặc đọc từ màn hình học sinh
+            Cập nhật tự động khi học sinh nộp bài
           </div>
         </div>
         <div style="overflow-x: auto">
@@ -3895,7 +3899,8 @@
         // Tính tổng điểm và sắp xếp
         const sorted = [...teacherGroups].map(g => ({
           ...g,
-          total: g.scores.c1 + g.scores.c2 + g.scores.c3 + g.scores.c4 + g.bonus
+          scores: g.scores || { c1:0, c2:0, c3:0, c4:0 },
+          total: calcTotal(g)
         })).sort((a, b) => b.total - a.total);
 
         const medals = ['🥇', '🥈', '🥉'];
@@ -4705,10 +4710,12 @@
         showScreen("s-complete");
         document.getElementById("s-complete").style.display = "flex";
 
-        // Lưu điểm cuối — đợi Firebase ghi xong (≈1.5s) rồi mới render BXH
+        // Lưu điểm cuối — đợi Firebase ghi xong (≈2s) rồi mới render BXH
         saveStudentProgress(true, total);
         setTimeout(() => {
-          // Dùng teacherGroups đã được sync từ Firebase listener
+          // teacherGroups đã được sync từ Firebase listener
+          // Gọi showLeaderboard để load + hiển thị đúng
+          loadTeacherData();
           refreshLeaderboard();
           showScreen("s-leaderboard");
         }, 2500);
@@ -4826,8 +4833,7 @@
         }
         tbody.innerHTML = teacherGroups
           .map((g, idx) => {
-            const total =
-              g.scores.c1 + g.scores.c2 + g.scores.c3 + g.scores.c4 + g.bonus;
+            const total = calcTotal(g);
             const pct = Math.round((total / 100) * 100);
             return `<tr>
       <td>
@@ -5085,14 +5091,13 @@
         showScreen("s-leaderboard");
       }
 
+      function calcTotal(g) {
+        const s = g.scores || {};
+        return Math.max(0, (s.c1||0) + (s.c2||0) + (s.c3||0) + (s.c4||0) + (g.bonus||0));
+      }
+
       function refreshLeaderboard() {
-        const sorted = [...teacherGroups].sort((a, b) => {
-          const ta =
-            a.scores.c1 + a.scores.c2 + a.scores.c3 + a.scores.c4 + a.bonus;
-          const tb =
-            b.scores.c1 + b.scores.c2 + b.scores.c3 + b.scores.c4 + b.bonus;
-          return tb - ta;
-        });
+        const sorted = [...teacherGroups].sort((a, b) => calcTotal(b) - calcTotal(a));
 
         const medals = ["🥇", "🥈", "🥉"];
         const stageNames = ["c1", "c2", "c3", "c4"];
@@ -5101,14 +5106,14 @@
         const list = document.getElementById("lb-list");
         if (!sorted.length) {
           list.innerHTML =
-            '<div style="text-align:center;color:rgba(255,255,255,.4);padding:3rem;font-size:1.1rem">Chưa có dữ liệu nhóm.<br>Thêm nhóm trong bảng điều khiển giáo viên.</div>';
+            '<div style="text-align:center;color:rgba(255,255,255,.4);padding:3rem;font-size:1.1rem">Chưa có nhóm nào nộp bài.<br>Dữ liệu sẽ xuất hiện tự động khi học sinh hoàn thành.</div>';
           return;
         }
 
         list.innerHTML = sorted
           .map((g, i) => {
-            const total =
-              g.scores.c1 + g.scores.c2 + g.scores.c3 + g.scores.c4 + g.bonus;
+            const total = calcTotal(g);
+            const sc = g.scores || {};
             const rankClass = i < 3 ? `rank-${i + 1}` : "";
             const rankDisplay =
               i < 3
@@ -5121,16 +5126,15 @@
             const stagePills = stageNames
               .map(
                 (s, si) => `
-      <span class="lb-stage-pill ${s}">${stageLabels[si]}: ${g.scores[s]}</span>
+      <span class="lb-stage-pill ${s}">${stageLabels[si]}: ${sc[s] || 0}</span>
     `,
               )
               .join("");
-            const totalClass = i < 3 ? "" : i + 1 + ' class="other-total"';
             return `<div class="lb-row ${rankClass}">
       ${rankDisplay}
       ${medal}
       <div class="lb-name">${g.name}${g.complete ? '<span style="font-size:.7rem;color:var(--teal);margin-left:.5rem;font-weight:600">✓ Done</span>' : ""}</div>
-      <div class="lb-stages">${stagePills}${g.bonus ? `<span class="lb-stage-pill" style="background:rgba(0,200,150,.15);color:#6EE7B7">🎁 ${g.bonus > 0 ? "+" : ""}${g.bonus} Không cầu cứu</span>` : ""}</div>
+      <div class="lb-stages">${stagePills}${g.bonus ? `<span class="lb-stage-pill" style="background:rgba(0,200,150,.15);color:#6EE7B7">🎁 ${g.bonus > 0 ? "+" : ""}${g.bonus} Cầu cứu</span>` : ""}</div>
       <div class="lb-total ${i >= 3 ? "other-total" : ""}">${total}</div>
     </div>`;
           })
