@@ -3484,6 +3484,12 @@
       // ═══════════════════════════════════════════
       //  GAME STATE
       // ═══════════════════════════════════════════
+          // Firebase state — populated by Firebase listener (firebase-module at bottom)
+      window.fbReady = window.fbReady || false;
+      window.fbState = window.fbState || { gameStarted: false, gameStopped: null, groups: {}, waiting: {} };
+      window.fbSet    = window.fbSet    || ((p,v) => console.warn("Firebase not ready yet"));
+      window.fbRemove = window.fbRemove || ((p)   => console.warn("Firebase not ready yet"));
+
       let state = {
         groupName: "",
         currentStage: 1,
@@ -3559,14 +3565,13 @@
       //  TEACHER GAME CONTROL
       // ═══════════════════════════════════════════
       function teacherStartGame() {
-        localStorage.setItem('gmtx_game_started', 'true');
+        fbSet('gameStarted', true); fbSet('gameStopped', null);
         updateGameStatusUI();
         showToast('✅ Đã mở trò chơi — Học sinh có thể bắt đầu!', 'success');
       }
 
       function teacherStopGame() {
-        localStorage.setItem('gmtx_game_started', 'false');
-        localStorage.setItem('gmtx_game_stopped', Date.now().toString()); // signal for students
+        fbSet('gameStarted', false); fbSet('gameStopped', Date.now());
         updateGameStatusUI();
         showToast('⏹ Đã dừng trò chơi.', 'error');
         showFinalScoreModal();
@@ -3585,21 +3590,12 @@
 
       function stopTeacherMonitor() {
         clearInterval(_teacherMonitorInterval);
+        _teacherMonitorInterval = null;
       }
 
       function refreshMonitor() {
-        // Collect all registered groups from localStorage (gmtx_waiting_*)
-        const waiting = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && key.startsWith('gmtx_waiting_')) {
-            try {
-              const d = JSON.parse(localStorage.getItem(key));
-              if (d && d.name) waiting.push(d);
-            } catch(e) {}
-          }
-        }
-        // Sort by joinedAt
+        // Collect waiting groups from Firebase
+        const waiting = Object.values(fbState.waiting || {});
         waiting.sort((a,b) => (a.joinedAt||0) - (b.joinedAt||0));
 
         const grid = document.getElementById('monitor-grid');
@@ -3716,7 +3712,7 @@
       }
 
       function updateGameStatusUI() {
-        const started = localStorage.getItem('gmtx_game_started') === 'true';
+        const started = fbState.gameStarted === true;
         const banner = document.getElementById('game-status-banner');
         const statusText = document.getElementById('game-status-text');
         const btnStart = document.getElementById('btn-teacher-start');
@@ -3755,8 +3751,8 @@
       }
 
       function updateStudentWaitUI() {
-        const started = localStorage.getItem('gmtx_game_started') === 'true';
-        const stoppedTs = localStorage.getItem('gmtx_game_stopped');
+        const started = fbState.gameStarted === true;
+        const stoppedTs = fbState.gameStopped;
 
         // Detect GV dừng game while playing → tính điểm & văng về oasis
         const isPlaying = ['s-stage-1','s-stage-2','s-stage-3','s-stage-4','s-result-1','s-result-2','s-result-3','s-result-4'].some(id =>
@@ -3764,9 +3760,9 @@
         );
         if (isPlaying && !started && stoppedTs) {
           // Remember we handled this stop event
-          const lastHandled = sessionStorage.getItem('gmtx_stop_handled');
+          const lastHandled = window._gmtxStopHandled;
           if (lastHandled !== stoppedTs) {
-            sessionStorage.setItem('gmtx_stop_handled', stoppedTs);
+            window._gmtxStopHandled = stoppedTs;
             stopStudentPoll();
             forceSaveAndReturnToOasis();
             return;
@@ -3777,7 +3773,7 @@
         if (started && document.getElementById('s-oasis-wait').classList.contains('active')) {
           stopStudentPoll();
           // Remove from waiting list
-          if (state.groupName) localStorage.removeItem('gmtx_waiting_' + slugify(state.groupName));
+          if (state.groupName) fbRemove('waiting/' + slugify(state.groupName));
           const flash = document.createElement('div');
           flash.className = 'oasis-go-flash';
           flash.innerHTML = '<div class="go-emoji">🚀</div><div class="go-text">Bắt đầu!</div>';
@@ -3835,10 +3831,10 @@
           return;
         }
         // Write to waiting list for teacher monitor
-        localStorage.setItem('gmtx_waiting_' + slugify(name), JSON.stringify({ name, joinedAt: Date.now() }));
+        fbSet('waiting/' + slugify(name), { name, joinedAt: Date.now() });
 
         // If game already started, go straight in
-        if (localStorage.getItem('gmtx_game_started') === 'true') {
+        if (fbState.gameStarted === true) {
           const flash = document.createElement('div');
           flash.className = 'oasis-go-flash';
           flash.innerHTML = '<div class="go-emoji">🚀</div><div class="go-text">Bắt đầu!</div>';
@@ -3861,7 +3857,7 @@
       // ═══════════════════════════════════════════
       function startGame() {
         // Kiểm tra giáo viên đã bắt đầu chưa
-        if (localStorage.getItem('gmtx_game_started') !== 'true') {
+        if (!fbState.gameStarted) {
           showToast('⏳ Vui lòng chờ giáo viên bắt đầu trò chơi!', 'error');
           return;
         }
@@ -4508,22 +4504,16 @@
       //  TEACHER DASHBOARD
       // ═══════════════════════════════════════════
       function loadTeacherData() {
-        try {
-          teacherGroups = JSON.parse(
-            localStorage.getItem("gmtx_teacher_groups") || "[]",
-          );
-        } catch (e) {
-          teacherGroups = [];
-        }
+        // Firebase realtime — data loaded via listener
       }
 
       function saveTeacherData() {
-        localStorage.setItem(
-          "gmtx_teacher_groups",
-          JSON.stringify(teacherGroups),
-        );
-        document.getElementById("t-group-count").textContent =
-          teacherGroups.length + " nhóm";
+        if (!fbReady) return;
+        const obj = {};
+        teacherGroups.forEach(g => { obj[slugify(g.name)] = g; });
+        fbSet('groups', obj);
+        const el = document.getElementById("t-group-count");
+        if (el) el.textContent = teacherGroups.length + " nhóm";
       }
 
       function addTeacherGroup() {
@@ -4552,6 +4542,7 @@
       function clearAllGroups() {
         if (!confirm("Xóa tất cả nhóm?")) return;
         teacherGroups = [];
+        fbSet('groups', null);
         saveTeacherData();
         renderTeacherTable();
       }
@@ -4599,6 +4590,8 @@
       }
 
       function removeGroup(idx) {
+        const g = teacherGroups[idx];
+        if (g) fbRemove('groups/' + slugify(g.name));
         teacherGroups.splice(idx, 1);
         saveTeacherData();
         renderTeacherTable();
@@ -4609,52 +4602,38 @@
       // ═══════════════════════════════════════════
       function saveStudentProgress(complete = false, finalTotal = 0) {
         try {
+          if (!state.groupName) return;
           const data = {
-            groupName: state.groupName,
+            name: state.groupName,
             scores: state.scores,
             hintsUsed: state.hintsUsed,
             complete,
             finalTotal,
             timestamp: Date.now(),
           };
-          localStorage.setItem(
-            "gmtx_progress_" + slugify(state.groupName),
-            JSON.stringify(data),
-          );
-          // Tự động lưu dữ liệu nhóm vào chế độ giáo viên
-          let existing = teacherGroups.find(
-            (g) => g.name === state.groupName,
-          );
-
-          // Nếu nhóm chưa tồn tại thì tự tạo mới
-          if (!existing && state.groupName) {
-            existing = {
-              name: state.groupName,
-              scores: { c1: 0, c2: 0, c3: 0, c4: 0 },
-              bonus: 0,
-              complete: false,
-            };
-
+          // Save to Firebase under groups/<slug>
+          const key = slugify(state.groupName);
+          const bonus = state.hintsUsed === 0 ? 3 : -(state.hintsUsed * 3);
+          fbSet('groups/' + key, {
+            name: state.groupName,
+            scores: { ...state.scores },
+            bonus: bonus > 0 ? bonus : 0,
+            complete,
+            finalTotal,
+            finishedAt: Date.now(),
+          });
+          // Also update local teacherGroups for immediate UI
+          let existing = teacherGroups.find(g => g.name === state.groupName);
+          if (!existing) {
+            existing = { name: state.groupName, scores: { c1:0,c2:0,c3:0,c4:0 }, bonus: 0, complete: false };
             teacherGroups.push(existing);
           }
-
-          // Cập nhật điểm từng chặng
-          if (existing) {
-            existing.scores = { ...state.scores };
-            existing.complete = complete;
-
-            // Tự động cộng thưởng nếu không dùng cầu cứu
-            existing.bonus = state.hintsUsed === 0 ? 3 : 0;
-
-            // Lưu tổng điểm cuối cùng để dùng cho BXH
-            existing.finalTotal = finalTotal;
-
-            // Lưu thời gian hoàn thành
-            existing.finishedAt = Date.now();
-
-            saveTeacherData();
-          }
-        } catch (e) {}
+          existing.scores = { ...state.scores };
+          existing.complete = complete;
+          existing.bonus = state.hintsUsed === 0 ? 3 : 0;
+          existing.finalTotal = finalTotal;
+          existing.finishedAt = Date.now();
+        } catch (e) { console.error(e); }
       }
 
       function slugify(s) {
@@ -4852,3 +4831,56 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
+<!-- ═══════════════════ FIREBASE SDK ═══════════════════ -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, remove, onValue }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC3iBjsXVfiwgnF8MTaDuIuQhgwhOtE2xA",
+    authDomain: "giai-ma-tin-hieu-xanh.firebaseapp.com",
+    databaseURL: "https://giai-ma-tin-hieu-xanh-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "giai-ma-tin-hieu-xanh",
+    storageBucket: "giai-ma-tin-hieu-xanh.firebasestorage.app",
+    messagingSenderId: "254960063936",
+    appId: "1:254960063936:web:f0afbeeefe866a0a492425"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
+
+  // Expose helpers to global scope
+  window.fbReady = false;
+  window.fbState = { gameStarted: false, gameStopped: null, groups: {}, waiting: {} };
+  window.fbSet    = (path, value) => set(ref(db, path), value).catch(e => console.error("fbSet", path, e));
+  window.fbRemove = (path)        => remove(ref(db, path)).catch(e => console.error("fbRemove", path, e));
+
+  // Listen to entire game node (realtime sync across all devices)
+  onValue(ref(db, '/'), (snap) => {
+    const data = snap.val() || {};
+    window.fbReady = true;
+
+    window.fbState.gameStarted = data.gameStarted === true;
+    window.fbState.gameStopped = data.gameStopped || null;
+    window.fbState.waiting     = data.waiting     || {};
+
+    // Sync teacherGroups array from Firebase
+    const raw = data.groups || {};
+    window.teacherGroups = Object.values(raw);
+
+    // Re-render teacher dashboard if active
+    const dash = document.getElementById('s-teacher-dash');
+    if (dash && dash.classList.contains('active')) {
+      if (typeof renderTeacherTable === 'function') renderTeacherTable();
+      if (typeof updateGameStatusUI  === 'function') updateGameStatusUI();
+      if (typeof refreshMonitor      === 'function') refreshMonitor();
+    }
+
+    // Trigger student wait UI check
+    if (typeof updateStudentWaitUI === 'function') updateStudentWaitUI();
+  });
+
+  console.log("\ud83d\udd25 Firebase connected — giai-ma-tin-hieu-xanh");
+</script>
+
