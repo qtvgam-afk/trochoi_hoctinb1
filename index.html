@@ -3835,7 +3835,8 @@
         updateGameStatusUI();
         stopTeacherTimer();
         showToast('⏹ Đã dừng trò chơi.', 'error');
-        showFinalScoreModal();
+        // Delay nhỏ để Firebase onValue kịp sync teacherGroups trước khi hiển thị modal
+        setTimeout(showFinalScoreModal, 600);
       }
 
       // ═══════════════════════════════════════════
@@ -3908,9 +3909,15 @@
         });
       }
 
+      // Helper: luôn lấy danh sách nhóm mới nhất (ưu tiên window nếu có nhiều hơn)
+      function getGroups() {
+        const wg = window.teacherGroups || [];
+        return wg.length >= teacherGroups.length ? wg : teacherGroups;
+      }
+
       function showFinalScoreModal() {
-        // Tính tổng điểm và sắp xếp
-        const sorted = [...teacherGroups].map(g => ({
+        // Đọc từ nguồn có dữ liệu nhất
+        const sorted = [...getGroups()].map(g => ({
           ...g,
           scores: g.scores || { c1:0, c2:0, c3:0, c4:0 },
           total: calcTotal(g)
@@ -4837,14 +4844,15 @@
 
       function renderTeacherTable() {
         const tbody = document.getElementById("teacher-tbody");
+        const groups = getGroups();
         document.getElementById("t-group-count").textContent =
-          teacherGroups.length + " nhóm";
-        if (!teacherGroups.length) {
+          groups.length + " nhóm";
+        if (!groups.length) {
           tbody.innerHTML =
             '<tr><td colspan="8" style="text-align:center;color:var(--mu);padding:2rem">⏳ Chưa có nhóm nào nộp bài. Học sinh hoàn thành sẽ tự động xuất hiện ở đây.</td></tr>';
           return;
         }
-        tbody.innerHTML = teacherGroups
+        tbody.innerHTML = groups
           .map((g, idx) => {
             const total = calcTotal(g);
             const pct = Math.round((total / 100) * 100);
@@ -5039,7 +5047,7 @@
         const grid = document.getElementById('group-obs-grid');
         if (!grid) return;
 
-        const groups = window.teacherGroups || [];
+        const groups = getGroups();
         const countEl = document.getElementById('obs-group-count');
         if (countEl) countEl.textContent = groups.length + ' nhóm';
 
@@ -5110,7 +5118,7 @@
       }
 
       function refreshLeaderboard() {
-        const sorted = [...teacherGroups].sort((a, b) => calcTotal(b) - calcTotal(a));
+        const sorted = [...getGroups()].sort((a, b) => calcTotal(b) - calcTotal(a));
 
         const medals = ["🥇", "🥈", "🥉"];
         const stageNames = ["c1", "c2", "c3", "c4"];
