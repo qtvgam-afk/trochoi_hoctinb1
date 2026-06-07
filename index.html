@@ -2136,6 +2136,13 @@
       .oasis-go-flash .go-text  { font-family: "Exo 2",sans-serif; font-size: 2.5rem; font-weight:900; color:#fff; }
       @keyframes goFlashIn { from { opacity:0; } to { opacity:1; } }
       @keyframes goSpin { from { transform: rotate(-30deg) scale(.5); } to { transform: rotate(0deg) scale(1); } }
+      @keyframes monCardIn {
+        from { opacity:0; transform:scale(.7) translateY(10px); }
+        to   { opacity:1; transform:scale(1) translateY(0); }
+      }
+      .monitor-card .mc-icon { font-size:1.6rem; }
+      .monitor-card .mc-name { font-family:'Exo 2',sans-serif; font-size:.85rem; font-weight:800; max-width:90px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .monitor-card .mc-status { font-size:.65rem; opacity:.65; }
     </style>
   </head>
   <body>
@@ -2882,6 +2889,34 @@
         <span id="game-status-text">Trò chơi <strong>chưa bắt đầu</strong> — Học sinh chưa thể chơi. Nhấn <em>Bắt đầu</em> để mở trò chơi cho các nhóm.</span>
       </div>
 
+      <!-- Live waiting room monitor -->
+      <div id="teacher-live-monitor" style="
+        background: linear-gradient(135deg,#022c1e,#065f46);
+        border-bottom: 2px solid rgba(0,200,150,.3);
+        padding: 1rem 1.5rem;
+      ">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem">
+          <div style="color:#fff;font-family:'Exo 2',sans-serif;font-weight:800;font-size:1rem;display:flex;align-items:center;gap:.5rem">
+            🏝️ Phòng Chờ — Các Nhóm Đã Đăng Ký
+            <span id="monitor-count" style="background:rgba(0,200,150,.25);border:1px solid rgba(0,200,150,.4);color:#6EE7B7;padding:2px 10px;border-radius:999px;font-size:.75rem;font-weight:700">0 nhóm</span>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="refreshMonitor()" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2);font-size:.78rem">
+            🔄 Làm mới
+          </button>
+        </div>
+        <div id="monitor-grid" style="
+          display:flex;
+          flex-wrap:wrap;
+          gap:.6rem;
+          min-height:60px;
+          align-items:flex-start;
+        ">
+          <div id="monitor-empty" style="color:rgba(255,255,255,.35);font-size:.85rem;padding:.5rem 0;font-style:italic">
+            Chưa có nhóm nào vào phòng chờ…
+          </div>
+        </div>
+      </div>
+
       <div class="wrap-wide">
         <div class="sec-title">Thêm Nhóm Học Sinh</div>
         <div class="tg-add">
@@ -3492,8 +3527,10 @@
           : "none";
         window.scrollTo(0, 0);
 
-        // Polling: bật khi vào setup học sinh hoặc oasis chờ, tắt khi rời
-        if (id === 's-student-setup' || id === 's-oasis-wait') {
+        // Polling: bật khi vào setup học sinh, oasis chờ, hoặc đang chơi
+        if (id === 's-student-setup' || id === 's-oasis-wait' ||
+            id === 's-stage-1' || id === 's-stage-2' || id === 's-stage-3' || id === 's-stage-4' ||
+            id === 's-result-1' || id === 's-result-2' || id === 's-result-3' || id === 's-result-4') {
           startStudentPoll();
         } else {
           stopStudentPoll();
@@ -3501,6 +3538,9 @@
         // Cập nhật banner trạng thái khi vào teacher dashboard
         if (id === 's-teacher-dash') {
           updateGameStatusUI();
+          startTeacherMonitor();
+        } else {
+          stopTeacherMonitor();
         }
       }
 
@@ -3526,9 +3566,89 @@
 
       function teacherStopGame() {
         localStorage.setItem('gmtx_game_started', 'false');
+        localStorage.setItem('gmtx_game_stopped', Date.now().toString()); // signal for students
         updateGameStatusUI();
         showToast('⏹ Đã dừng trò chơi.', 'error');
         showFinalScoreModal();
+      }
+
+      // ═══════════════════════════════════════════
+      //  TEACHER LIVE MONITOR
+      // ═══════════════════════════════════════════
+      let _teacherMonitorInterval = null;
+
+      function startTeacherMonitor() {
+        clearInterval(_teacherMonitorInterval);
+        refreshMonitor();
+        _teacherMonitorInterval = setInterval(refreshMonitor, 2000);
+      }
+
+      function stopTeacherMonitor() {
+        clearInterval(_teacherMonitorInterval);
+      }
+
+      function refreshMonitor() {
+        // Collect all registered groups from localStorage (gmtx_waiting_*)
+        const waiting = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('gmtx_waiting_')) {
+            try {
+              const d = JSON.parse(localStorage.getItem(key));
+              if (d && d.name) waiting.push(d);
+            } catch(e) {}
+          }
+        }
+        // Sort by joinedAt
+        waiting.sort((a,b) => (a.joinedAt||0) - (b.joinedAt||0));
+
+        const grid = document.getElementById('monitor-grid');
+        const empty = document.getElementById('monitor-empty');
+        const count = document.getElementById('monitor-count');
+        if (!grid) return;
+
+        count.textContent = waiting.length + ' nhóm';
+
+        if (!waiting.length) {
+          empty.style.display = 'block';
+          // Remove all cards
+          grid.querySelectorAll('.monitor-card').forEach(c => c.remove());
+          return;
+        }
+        empty.style.display = 'none';
+
+        // Build/update cards
+        const existingNames = new Set([...grid.querySelectorAll('.monitor-card')].map(c => c.dataset.name));
+        const newNames = new Set(waiting.map(d => d.name));
+
+        // Remove cards no longer present
+        grid.querySelectorAll('.monitor-card').forEach(c => {
+          if (!newNames.has(c.dataset.name)) c.remove();
+        });
+
+        // Add new cards
+        waiting.forEach(d => {
+          if (!existingNames.has(d.name)) {
+            const card = document.createElement('div');
+            card.className = 'monitor-card';
+            card.dataset.name = d.name;
+            const icons = ['🦀','🐠','🐬','🐢','🐙','⭐','🦈','🐡'];
+            const icon = icons[Math.abs(d.name.split('').reduce((a,c)=>a+c.charCodeAt(0),0)) % icons.length];
+            card.innerHTML = `
+              <div class="mc-icon">${icon}</div>
+              <div class="mc-name">${d.name}</div>
+              <div class="mc-status">⏳ Đang chờ</div>
+            `;
+            card.style.cssText = `
+              display:flex;flex-direction:column;align-items:center;gap:4px;
+              background:rgba(255,255,255,.1);border:1.5px solid rgba(0,200,150,.3);
+              border-radius:12px;padding:.6rem .9rem;min-width:100px;
+              animation:monCardIn .35s ease;
+              color:#fff;text-align:center;
+            `;
+            grid.appendChild(card);
+          }
+        });
       }
 
       function showFinalScoreModal() {
@@ -3636,10 +3756,28 @@
 
       function updateStudentWaitUI() {
         const started = localStorage.getItem('gmtx_game_started') === 'true';
+        const stoppedTs = localStorage.getItem('gmtx_game_stopped');
+
+        // Detect GV dừng game while playing → tính điểm & văng về oasis
+        const isPlaying = ['s-stage-1','s-stage-2','s-stage-3','s-stage-4','s-result-1','s-result-2','s-result-3','s-result-4'].some(id =>
+          document.getElementById(id) && document.getElementById(id).classList.contains('active')
+        );
+        if (isPlaying && !started && stoppedTs) {
+          // Remember we handled this stop event
+          const lastHandled = sessionStorage.getItem('gmtx_stop_handled');
+          if (lastHandled !== stoppedTs) {
+            sessionStorage.setItem('gmtx_stop_handled', stoppedTs);
+            stopStudentPoll();
+            forceSaveAndReturnToOasis();
+            return;
+          }
+        }
+
         // If on oasis wait screen and game just started → auto-launch game!
         if (started && document.getElementById('s-oasis-wait').classList.contains('active')) {
           stopStudentPoll();
-          // Flash animation then start
+          // Remove from waiting list
+          if (state.groupName) localStorage.removeItem('gmtx_waiting_' + slugify(state.groupName));
           const flash = document.createElement('div');
           flash.className = 'oasis-go-flash';
           flash.innerHTML = '<div class="go-emoji">🚀</div><div class="go-text">Bắt đầu!</div>';
@@ -3651,6 +3789,44 @@
         }
       }
 
+      function forceSaveAndReturnToOasis() {
+        // Save current progress with whatever scores we have
+        const { c1, c2, c3, c4 } = state.scores;
+        const bonusCalc = state.hintsUsed === 0 ? 3 : -(state.hintsUsed * 3);
+        const total = Math.max(0, c1 + c2 + c3 + c4 + bonusCalc);
+        saveStudentProgress(false, total);
+
+        if (state.timerInterval) { clearInterval(state.timerInterval); state.timerInterval = null; }
+
+        // Show flash
+        const flash = document.createElement('div');
+        flash.className = 'oasis-go-flash';
+        flash.style.background = 'linear-gradient(135deg,#dc2626,#7f1d1d)';
+        flash.innerHTML = '<div class="go-emoji">⏹</div><div class="go-text" style="font-size:1.6rem;text-align:center">Giáo viên đã dừng!<br><span style="font-size:1rem;font-weight:400;opacity:.8">Điểm của bạn đã được lưu</span></div>';
+        document.body.appendChild(flash);
+
+        setTimeout(() => {
+          flash.remove();
+          document.getElementById('game-bar').style.display = 'none';
+          document.getElementById('stage-dots-bar').style.display = 'none';
+          // Update oasis score display
+          const oasisGroupName = state.groupName || document.getElementById('oasis-group-name').textContent;
+          document.getElementById('oasis-group-name').textContent = oasisGroupName;
+          // Show score on oasis wait box
+          const waitMsg = document.querySelector('.oasis-wait-msg');
+          if (waitMsg) {
+            waitMsg.innerHTML = `
+              <div style="font-size:2rem;margin-bottom:.25rem">🏁</div>
+              <div class="oasis-wait-title" style="color:var(--g1)">Trò chơi đã kết thúc!</div>
+              <div style="font-size:1.5rem;font-weight:900;font-family:'Exo 2',sans-serif;color:var(--g1);margin:.4rem 0">${total} điểm</div>
+              <div style="font-size:.8rem;color:var(--txt2)">C1: ${c1} · C2: ${c2} · C3: ${c3} · C4: ${c4}${bonusCalc !== 0 ? ' · Thưởng: ' + (bonusCalc > 0 ? '+' : '') + bonusCalc : ''}</div>
+              <div style="font-size:.78rem;color:var(--mu);margin-top:.4rem">Chờ giáo viên chiếu bảng xếp hạng 🎉</div>
+            `;
+          }
+          showScreen('s-oasis-wait');
+        }, 2000);
+      }
+
       // Register group name and go to oasis waiting screen
       function registerGroup() {
         const name = document.getElementById("groupNameInput").value.trim();
@@ -3658,6 +3834,9 @@
           showToast("Vui lòng nhập tên nhóm!", "error");
           return;
         }
+        // Write to waiting list for teacher monitor
+        localStorage.setItem('gmtx_waiting_' + slugify(name), JSON.stringify({ name, joinedAt: Date.now() }));
+
         // If game already started, go straight in
         if (localStorage.getItem('gmtx_game_started') === 'true') {
           const flash = document.createElement('div');
@@ -3671,6 +3850,7 @@
           return;
         }
         // Save name and show waiting screen
+        state.groupName = name;
         document.getElementById('oasis-group-name').textContent = name;
         showScreen('s-oasis-wait');
         startStudentPoll();
