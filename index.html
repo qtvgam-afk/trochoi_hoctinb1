@@ -2490,7 +2490,7 @@
             <div class="oasis-wait-title">Đang chờ Giáo Viên ra hiệu lệnh…</div>
             <div class="oasis-wait-sub">Trang sẽ tự động vào game khi giáo viên nhấn <strong>Bắt đầu</strong></div>
           </div>
-          <button class="btn btn-ghost btn-sm oasis-back-btn" onclick="showScreen('s-student-setup')">← Đổi tên nhóm</button>
+          <button class="btn btn-ghost btn-sm oasis-back-btn" onclick="changeGroupName()">← Đổi tên nhóm</button>
         </div>
       </div>
     </div>
@@ -4067,6 +4067,27 @@
         }, 2000);
       }
 
+      // Xóa tên cũ khỏi Firebase rồi về màn setup
+      function changeGroupName() {
+        const oldName = state.groupName;
+        if (oldName) {
+          const oldKey = slugify(oldName);
+          if (typeof window.fbRemove === 'function') {
+            window.fbRemove('waiting/' + oldKey);
+            window.fbRemove('groups/' + oldKey);
+          }
+          // Xóa khỏi local list ngay lập tức
+          const idx = teacherGroups.findIndex(g => g.name === oldName);
+          if (idx !== -1) teacherGroups.splice(idx, 1);
+          state.groupName = '';
+        }
+        stopStudentPoll();
+        // Xóa nội dung input để nhóm gõ lại
+        const input = document.getElementById('groupNameInput');
+        if (input) input.value = '';
+        showScreen('s-student-setup');
+      }
+
       // Register group name and go to oasis waiting screen
       function registerGroup() {
         const name = document.getElementById("groupNameInput").value.trim();
@@ -4074,11 +4095,25 @@
           showToast("Vui lòng nhập tên nhóm!", "error");
           return;
         }
+
+        // Nếu đang có tên cũ khác → xóa trước
+        const oldName = state.groupName;
+        if (oldName && oldName !== name) {
+          const oldKey = slugify(oldName);
+          if (typeof window.fbRemove === 'function') {
+            window.fbRemove('waiting/' + oldKey);
+            window.fbRemove('groups/' + oldKey);
+          }
+          const idx = teacherGroups.findIndex(g => g.name === oldName);
+          if (idx !== -1) teacherGroups.splice(idx, 1);
+        }
+
         // Write to waiting list for teacher monitor
         fbSet('waiting/' + slugify(name), { name, joinedAt: Date.now() });
 
         // If game already started, go straight in
         if (fbState.gameStarted === true) {
+          state.groupName = name;
           const flash = document.createElement('div');
           flash.className = 'oasis-go-flash';
           flash.innerHTML = '<div class="go-emoji">🚀</div><div class="go-text">Bắt đầu!</div>';
@@ -4640,16 +4675,6 @@
       // ═══════════════════════════════════════════
       function showComplete() {
         const { c1, c2, c3, c4 } = state.scores;
-        const hintBonus =
-          state.hintsUsed === 0
-            ? 3
-            : state.hintsUsed === 1
-              ? 0
-              : -3 * (state.hintsUsed - 0);
-        const hintBonusActual = Math.max(
-          -6,
-          state.hintsUsed === 0 ? 3 : -(state.hintsUsed * 3),
-        );
         const hintBonusDisplay =
           state.hintsUsed === 0
             ? "+3 (không dùng thẻ cầu cứu)"
@@ -4678,16 +4703,15 @@
         document.getElementById("game-bar").style.display = "none";
         document.getElementById("stage-dots-bar").style.display = "none";
         showScreen("s-complete");
-
-          // Sau 3 giây tự hiện BXH
-          setTimeout(() => {
-            renderLeaderboard();
-            showScreen("s-leaderboard");
-          }, 3000);
         document.getElementById("s-complete").style.display = "flex";
 
-        // Save final to teacher storage
+        // Lưu điểm cuối — đợi Firebase ghi xong (≈1.5s) rồi mới render BXH
         saveStudentProgress(true, total);
+        setTimeout(() => {
+          // Dùng teacherGroups đã được sync từ Firebase listener
+          refreshLeaderboard();
+          showScreen("s-leaderboard");
+        }, 2500);
       }
 
       // ═══════════════════════════════════════════
@@ -4847,39 +4871,44 @@
       function saveStudentProgress(complete = false, finalTotal = 0) {
         try {
           if (!state.groupName) return;
-          const data = {
-            name: state.groupName,
-            scores: state.scores,
-            hintsUsed: state.hintsUsed,
-            complete,
-            finalTotal,
-            timestamp: Date.now(),
-          };
-          // Save to Firebase under groups/<slug>
           const key = slugify(state.groupName);
+          // Bonus: +3 nếu không dùng thẻ, -3 mỗi thẻ đã dùng, tối thiểu -6
           const bonus = state.hintsUsed === 0 ? 3 : -(state.hintsUsed * 3);
-          fbSet('groups/' + key, {
+          const payload = {
             name: state.groupName,
             scores: { ...state.scores },
-            bonus: bonus > 0 ? bonus : 0,
+            bonus: bonus,          // ← giữ nguyên cả âm lẫn dương
             complete,
             finalTotal,
             finishedAt: Date.now(),
             currentStage: state.currentStage || 1,
             hintsUsed: state.hintsUsed || 0,
-          });
-          // Also update local teacherGroups for immediate UI
+          };
+
+          // Nếu fbSet chưa sẵn sàng thì retry sau 1 giây (module load chậm)
+          function doSave(retries) {
+            if (typeof window.fbSet === 'function') {
+              window.fbSet('groups/' + key, payload);
+            } else if (retries > 0) {
+              setTimeout(() => doSave(retries - 1), 1000);
+            }
+          }
+          doSave(5);
+
+          // Cập nhật local teacherGroups ngay lập tức (để BXH hiện đúng ngay)
           let existing = teacherGroups.find(g => g.name === state.groupName);
           if (!existing) {
             existing = { name: state.groupName, scores: { c1:0,c2:0,c3:0,c4:0 }, bonus: 0, complete: false };
             teacherGroups.push(existing);
           }
-          existing.scores = { ...state.scores };
+          existing.scores   = { ...state.scores };
           existing.complete = complete;
-          existing.bonus = state.hintsUsed === 0 ? 3 : 0;
-          existing.finalTotal = finalTotal;
-          existing.finishedAt = Date.now();
-        } catch (e) { console.error(e); }
+          existing.bonus    = bonus;
+          existing.finalTotal  = finalTotal;
+          existing.finishedAt  = Date.now();
+          existing.hintsUsed   = state.hintsUsed;
+          existing.currentStage = state.currentStage || 1;
+        } catch (e) { console.error('saveStudentProgress error:', e); }
       }
 
       function slugify(s) {
@@ -5282,6 +5311,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (typeof renderTeacherTable === 'function') renderTeacherTable();
       if (typeof updateGameStatusUI  === 'function') updateGameStatusUI();
       if (typeof refreshMonitor      === 'function') refreshMonitor();
+    }
+
+    // Re-render leaderboard nếu đang hiển thị (học sinh xem BXH sau khi nộp)
+    const lb = document.getElementById('s-leaderboard');
+    if (lb && lb.classList.contains('active')) {
+      if (typeof refreshLeaderboard === 'function') refreshLeaderboard();
     }
 
     // Trigger student wait UI check
