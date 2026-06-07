@@ -3750,7 +3750,20 @@
         c3Top3: [],
       };
 
-      let teacherGroups = [];
+      var teacherGroups = [];
+      // Bridge: Firebase module (ES module scope) gọi hàm này để cập nhật teacherGroups local
+      window._syncTeacherGroups = function(arr) {
+        teacherGroups = arr;
+        // Re-render nếu dashboard đang hiển thị
+        const dash = document.getElementById('s-teacher-dash');
+        if (dash && dash.classList.contains('active')) {
+          if (typeof renderTeacherTable === 'function') renderTeacherTable();
+        }
+        const lb = document.getElementById('s-leaderboard');
+        if (lb && lb.classList.contains('active')) {
+          if (typeof refreshLeaderboard === 'function') refreshLeaderboard();
+        }
+      };
 
       // ═══════════════════════════════════════════
       //  SCREEN MANAGEMENT
@@ -4828,7 +4841,7 @@
           teacherGroups.length + " nhóm";
         if (!teacherGroups.length) {
           tbody.innerHTML =
-            '<tr><td colspan="8" style="text-align:center;color:var(--mu);padding:2rem">Chưa có nhóm nào. Thêm nhóm ở trên ↑</td></tr>';
+            '<tr><td colspan="8" style="text-align:center;color:var(--mu);padding:2rem">⏳ Chưa có nhóm nào nộp bài. Học sinh hoàn thành sẽ tự động xuất hiện ở đây.</td></tr>';
           return;
         }
         tbody.innerHTML = teacherGroups
@@ -5307,7 +5320,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Sync teacherGroups array from Firebase
     const raw = data.groups || {};
-    window.teacherGroups = Object.values(raw);
+    const newGroups = Object.values(raw);
+    window.teacherGroups = newGroups;
+    // Cập nhật biến local trong script thường (không phải module) qua bridge
+    if (typeof window._syncTeacherGroups === 'function') {
+      window._syncTeacherGroups(newGroups);
+    }
 
     // Re-render teacher dashboard if active
     const dash = document.getElementById('s-teacher-dash');
