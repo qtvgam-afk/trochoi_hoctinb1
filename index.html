@@ -2338,6 +2338,172 @@
       .monitor-card .mc-icon { font-size:1.6rem; }
       .monitor-card .mc-name { font-family:'Exo 2',sans-serif; font-size:.85rem; font-weight:800; max-width:90px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
       .monitor-card .mc-status { font-size:.65rem; opacity:.65; }
+
+      /* ══════════════════════════════════════
+         LOBBY CREATURE SYSTEM
+      ══════════════════════════════════════ */
+      #lobby-creatures-layer {
+        position: absolute;
+        inset: 0;
+        z-index: 7;
+        overflow: hidden;
+        pointer-events: none;
+      }
+      .lobby-creature {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        pointer-events: none;
+        transition: left 1.4s cubic-bezier(.34,1.3,.64,1), bottom 1s cubic-bezier(.34,1.3,.64,1);
+      }
+      .lobby-creature.creature-mine {
+        pointer-events: auto;
+        z-index: 9;
+      }
+      .creature-body {
+        font-size: 2.8rem;
+        line-height: 1;
+        filter: drop-shadow(0 4px 12px rgba(0,0,0,.28));
+        transition: transform 0.45s ease;
+        display: block;
+      }
+      .creature-label {
+        background: rgba(255,255,255,.93);
+        border: 1.5px solid rgba(0,200,150,.45);
+        border-radius: 999px;
+        padding: 2px 10px;
+        font-size: 0.66rem;
+        font-weight: 700;
+        color: #065f46;
+        white-space: nowrap;
+        box-shadow: 0 2px 8px rgba(0,0,0,.12);
+        font-family: 'Be Vietnam Pro', sans-serif;
+        letter-spacing: 0.01em;
+      }
+      .creature-mine .creature-label {
+        background: rgba(0,200,150,.92);
+        color: #fff;
+        border-color: rgba(0,200,150,.8);
+        font-size: 0.7rem;
+        box-shadow: 0 2px 12px rgba(0,200,150,.35);
+      }
+      .creature-speech {
+        position: absolute;
+        top: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255,255,255,.97);
+        border: 1.5px solid rgba(0,200,150,.5);
+        border-radius: 10px 10px 10px 2px;
+        padding: 2px 9px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #065f46;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+        z-index: 12;
+        box-shadow: 0 2px 8px rgba(0,0,0,.1);
+      }
+      /* Click ripple on ocean */
+      .oasis-click-ripple {
+        position: absolute;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        border: 2.5px solid rgba(0,200,150,.75);
+        background: rgba(0,200,150,.15);
+        pointer-events: none;
+        z-index: 11;
+        transform: translate(-50%, -50%) scale(0);
+        animation: oasisRippleAnim 0.9s ease-out forwards;
+      }
+      @keyframes oasisRippleAnim {
+        to { transform: translate(-50%, -50%) scale(5); opacity: 0; }
+      }
+      /* Swim hint */
+      .oasis-swim-hint {
+        position: absolute;
+        bottom: 47%;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 12;
+        background: rgba(0,0,0,.3);
+        backdrop-filter: blur(4px);
+        color: rgba(255,255,255,.95);
+        border-radius: 999px;
+        padding: 5px 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        font-family: 'Be Vietnam Pro', sans-serif;
+        pointer-events: none;
+        white-space: nowrap;
+        opacity: 0;
+        animation: swHintLoop 8s ease-in-out 4s infinite;
+      }
+      @keyframes swHintLoop {
+        0%, 100% { opacity: 0; transform: translateX(-50%) translateY(5px); }
+        20%, 70%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+      }
+      /* No-groups placeholder */
+      .lobby-empty-hint {
+        position: absolute;
+        bottom: 52%;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 8;
+        color: rgba(255,255,255,.55);
+        font-size: 0.78rem;
+        font-family: 'Be Vietnam Pro', sans-serif;
+        white-space: nowrap;
+        text-align: center;
+        pointer-events: none;
+      }
+      /* Creature idle animations */
+      @keyframes swimFishAnim {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        30%       { transform: translateY(-9px) rotate(-8deg); }
+        70%       { transform: translateY(-4px) rotate(5deg); }
+      }
+      @keyframes swimDolphinAnim {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50%       { transform: translateY(-18px) rotate(-12deg); }
+      }
+      @keyframes walkCrabAnim {
+        0%, 100% { transform: translateX(0) scaleY(1); }
+        25%       { transform: translateX(6px) scaleY(.96); }
+        75%       { transform: translateX(-6px) scaleY(.96); }
+      }
+      @keyframes swimTurtleAnim {
+        0%, 100% { transform: translateY(0); }
+        50%       { transform: translateY(-8px); }
+      }
+      @keyframes floatPulseAnim {
+        0%, 100% { transform: scale(1); }
+        50%       { transform: scale(1.1); }
+      }
+      @keyframes hopBounceAnim {
+        0%, 55%, 100% { transform: translateY(0); }
+        28%           { transform: translateY(-16px); }
+      }
+      @keyframes swimSharkAnim {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        30%       { transform: translateY(-5px) rotate(-5deg); }
+        70%       { transform: translateY(-3px) rotate(3deg); }
+      }
+      .creature-fish     .creature-body { animation: swimFishAnim    2.2s ease-in-out infinite; }
+      .creature-dolphin  .creature-body { animation: swimDolphinAnim 1.8s ease-in-out infinite; }
+      .creature-crab     .creature-body { animation: walkCrabAnim    1.4s ease-in-out infinite; }
+      .creature-turtle   .creature-body { animation: swimTurtleAnim  3s   ease-in-out infinite; }
+      .creature-octopus  .creature-body { animation: floatPulseAnim  2s   ease-in-out infinite; }
+      .creature-shrimp   .creature-body { animation: hopBounceAnim   1.6s ease-in-out infinite; }
+      .creature-shark    .creature-body { animation: swimSharkAnim   1.7s ease-in-out infinite; }
+      .creature-blowfish .creature-body { animation: floatPulseAnim  2.8s ease-in-out infinite; }
+      .creature-fish2    .creature-body { animation: swimFishAnim    2.6s ease-in-out infinite 0.5s; }
+      .creature-starfish .creature-body { animation: floatPulseAnim  4s   ease-in-out infinite; }
     </style>
   </head>
   <body>
@@ -2460,7 +2626,7 @@
             <div class="coconut c1"></div>
             <div class="coconut c2"></div>
           </div>
-          <!-- Cute characters -->
+          <!-- Cute characters (background decoration) -->
           <div class="cute-char crab-char">🦀</div>
           <div class="cute-char fish-char">🐠</div>
           <div class="cute-char starfish-char">⭐</div>
@@ -2474,10 +2640,12 @@
           <div class="bubble b4"></div>
           <div class="bubble b5"></div>
         </div>
+        <!-- Swim hint -->
+        <div class="oasis-swim-hint" id="oasis-swim-hint">🎮 Chạm màn hình để bơi lội!</div>
         <!-- Waiting UI -->
         <div class="oasis-ui">
           <div class="oasis-team-badge">
-            <span class="oasis-badge-icon">🏝️</span>
+            <span class="oasis-badge-icon" id="oasis-badge-icon">🏝️</span>
             <div>
               <div class="oasis-team-label">Nhóm đã đăng ký</div>
               <div class="oasis-team-name" id="oasis-group-name">—</div>
@@ -4052,6 +4220,11 @@
             startGame();
           }, 900);
         }
+        // Update creature display if waiting
+        if (typeof renderWaitingCreatures === 'function' &&
+            document.getElementById('s-oasis-wait')?.classList.contains('active')) {
+          renderWaitingCreatures();
+        }
       }
 
       function forceSaveAndReturnToOasis() {
@@ -4152,8 +4325,14 @@
         // Save name and show waiting screen
         state.groupName = name;
         document.getElementById('oasis-group-name').textContent = name;
+        // Set creature emoji in badge
+        if (typeof getCreatureForGroup === 'function') {
+          const myC = getCreatureForGroup(name);
+          document.getElementById('oasis-badge-icon').textContent = myC.emoji;
+        }
         showScreen('s-oasis-wait');
         startStudentPoll();
+        setTimeout(renderWaitingCreatures, 150);
       }
 
       // ═══════════════════════════════════════════
@@ -5292,6 +5471,255 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
+<!-- ═══════════════════ LOBBY CREATURE SYSTEM ═══════════════════ -->
+<script>
+// ─── DATA ───────────────────────────────────────────────────────
+const LOBBY_CREATURES = [
+  { type: 'fish',     emoji: '🐠', label: 'Cá Cam'    },
+  { type: 'dolphin',  emoji: '🐬', label: 'Cá Heo'    },
+  { type: 'crab',     emoji: '🦀', label: 'Cua'        },
+  { type: 'turtle',   emoji: '🐢', label: 'Rùa Biển'  },
+  { type: 'octopus',  emoji: '🐙', label: 'Bạch Tuộc' },
+  { type: 'shrimp',   emoji: '🦐', label: 'Tôm Hùm'  },
+  { type: 'shark',    emoji: '🦈', label: 'Cá Mập'    },
+  { type: 'blowfish', emoji: '🐡', label: 'Cá Nóc'    },
+  { type: 'fish2',    emoji: '🐟', label: 'Cá Xanh'   },
+  { type: 'starfish', emoji: '🌟', label: 'Sao Biển'  },
+];
+
+// Returns a creature type based on the group name hash
+function getCreatureForGroup(groupName) {
+  const hash = Math.abs(
+    groupName.split('').reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 0)
+  );
+  return LOBBY_CREATURES[hash % LOBBY_CREATURES.length];
+}
+
+// ─── STATE ──────────────────────────────────────────────────────
+const _cState = {
+  positions: {},      // { name: { x, y, dir } }
+  autoIntervals: {},  // { name: intervalId }
+  bubbleTimers: {},   // { slug: timeoutId }
+};
+
+// ─── HELPERS ────────────────────────────────────────────────────
+function _safeSlug(name) {
+  return name.replace(/[^a-zA-Z0-9]/g, '_');
+}
+
+function _getLobbyLayer() {
+  let layer = document.getElementById('lobby-creatures-layer');
+  if (!layer) {
+    const bg = document.querySelector('#s-oasis-wait .oasis-bg');
+    if (!bg) return null;
+    layer = document.createElement('div');
+    layer.id = 'lobby-creatures-layer';
+    const hint = document.getElementById('oasis-swim-hint');
+    bg.insertBefore(layer, hint || bg.querySelector('.oasis-ui') || null);
+  }
+  return layer;
+}
+
+// ─── RENDER ─────────────────────────────────────────────────────
+function renderWaitingCreatures() {
+  const screen = document.getElementById('s-oasis-wait');
+  if (!screen || !screen.classList.contains('active')) return;
+
+  const layer = _getLobbyLayer();
+  if (!layer) return;
+
+  const myName = (typeof state !== 'undefined' && state.groupName) ? state.groupName : '';
+  const raw = (typeof fbState !== 'undefined') ? Object.values(fbState.waiting || {}) : [];
+
+  // Make sure current group appears even if Firebase hasn't synced
+  const waiting = [...raw];
+  if (myName && !waiting.find(w => w.name === myName)) {
+    waiting.unshift({ name: myName, joinedAt: Date.now() - 100 });
+  }
+  waiting.sort((a, b) => (a.joinedAt || 0) - (b.joinedAt || 0));
+
+  // ── Remove departed creatures ──
+  const activeNames = new Set(waiting.map(w => w.name));
+  layer.querySelectorAll('.lobby-creature').forEach(el => {
+    const n = el.dataset.name;
+    if (!activeNames.has(n)) {
+      el.style.opacity = '0';
+      el.style.transform = 'scale(0.5)';
+      setTimeout(() => el.remove(), 400);
+      clearInterval(_cState.autoIntervals[n]);
+      delete _cState.autoIntervals[n];
+      delete _cState.positions[n];
+    }
+  });
+
+  // ── Spawn / update creatures ──
+  waiting.forEach((group, idx) => {
+    const name  = group.name;
+    const isMe  = name === myName;
+    const slug  = _safeSlug(name);
+    const cDef  = getCreatureForGroup(name);
+
+    // Init position — spread across the ocean area
+    if (!_cState.positions[name]) {
+      // Stagger left positions so they don't overlap immediately
+      const spreadX = 8 + ((idx * 19) % 72);
+      const spreadY = 4 + ((idx * 11) % 24);
+      _cState.positions[name] = { x: spreadX, y: spreadY, dir: 1 };
+    }
+
+    // Skip if element already exists
+    if (layer.querySelector(`[data-slug="${slug}"]`)) return;
+
+    const pos = _cState.positions[name];
+    const el  = document.createElement('div');
+    el.className = `lobby-creature creature-${cDef.type}${isMe ? ' creature-mine' : ''}`;
+    el.dataset.name = name;
+    el.dataset.slug  = slug;
+    el.style.cssText = `
+      position: absolute;
+      left: ${pos.x}%;
+      bottom: ${pos.y}%;
+      transition: left 1.4s cubic-bezier(.34,1.3,.64,1), bottom 1s cubic-bezier(.34,1.3,.64,1),
+                  opacity 0.4s, transform 0.4s;
+      opacity: 0;
+      transform: scale(0.4) translateY(20px);
+    `;
+    el.innerHTML = `
+      <div class="creature-speech" id="cspeech-${slug}"></div>
+      <div class="creature-body">${cDef.emoji}</div>
+      <div class="creature-label">${isMe ? '⭐ ' : ''}${name}</div>
+    `;
+    layer.appendChild(el);
+
+    // Animate in
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.style.opacity = '1';
+        el.style.transform = 'scale(1) translateY(0)';
+      });
+    });
+
+    // Autonomous swim for other groups
+    if (!isMe) {
+      setTimeout(() => _startAutoSwim(name, el), 600 + idx * 200);
+    }
+  });
+
+  // ── Show/hide swim hint ──
+  const hint = document.getElementById('oasis-swim-hint');
+  if (hint) hint.style.display = myName ? 'block' : 'none';
+}
+
+// ─── AUTO-SWIM ──────────────────────────────────────────────────
+function _startAutoSwim(name, el) {
+  clearInterval(_cState.autoIntervals[name]);
+
+  function swim() {
+    const screen = document.getElementById('s-oasis-wait');
+    if (!screen?.classList.contains('active')) return;
+    if (!document.contains(el)) return;
+
+    const pos = _cState.positions[name] || { x: 20, y: 10, dir: 1 };
+    const dx  = (Math.random() - 0.42) * 24;
+    const dy  = (Math.random() - 0.5) * 13;
+    const nx  = Math.min(87, Math.max(4, pos.x + dx));
+    const ny  = Math.min(36, Math.max(3, pos.y + dy));
+    const dir = nx > pos.x ? 1 : -1;
+
+    _cState.positions[name] = { x: nx, y: ny, dir };
+    el.style.left   = nx + '%';
+    el.style.bottom = ny + '%';
+
+    // Flip body to face swim direction
+    const body = el.querySelector('.creature-body');
+    if (body) body.style.transform = `scaleX(${dir})`;
+  }
+
+  // First swim after a short settle delay, then recurring
+  const delay = 1000 + Math.random() * 1500;
+  const period = 2200 + Math.random() * 1800;
+  setTimeout(swim, delay);
+  _cState.autoIntervals[name] = setInterval(swim, period);
+}
+
+// ─── MY CREATURE MOVE ───────────────────────────────────────────
+function _moveMyCreature(xPct, yPct) {
+  const myName = (typeof state !== 'undefined') ? state.groupName : '';
+  if (!myName) return;
+
+  const layer = document.getElementById('lobby-creatures-layer');
+  if (!layer) return;
+
+  const myEl = layer.querySelector('.creature-mine');
+  if (!myEl) return;
+
+  const pos = _cState.positions[myName] || { x: 30, y: 15, dir: 1 };
+  const nx  = Math.min(88, Math.max(2, xPct));
+  const ny  = Math.min(42, Math.max(2, yPct));
+  const dir = nx > pos.x ? 1 : -1;
+
+  _cState.positions[myName] = { x: nx, y: ny, dir };
+  myEl.style.left   = nx + '%';
+  myEl.style.bottom = ny + '%';
+
+  // Flip body
+  const body = myEl.querySelector('.creature-body');
+  if (body) body.style.transform = `scaleX(${dir})`;
+
+  // Fun speech bubble reaction
+  const slug = _safeSlug(myName);
+  const speech = document.getElementById('cspeech-' + slug);
+  if (speech) {
+    const reactions = ['🌊', '💨', 'Weee!', '🫧', '🐾', '💦', '✨'];
+    speech.textContent = reactions[Math.floor(Math.random() * reactions.length)];
+    speech.style.opacity = '1';
+    clearTimeout(_cState.bubbleTimers[slug]);
+    _cState.bubbleTimers[slug] = setTimeout(() => {
+      speech.style.opacity = '0';
+    }, 1100);
+  }
+}
+
+// ─── CLICK HANDLER ──────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  const screen = document.getElementById('s-oasis-wait');
+  if (!screen || !screen.classList.contains('active')) return;
+  if (!(typeof state !== 'undefined' && state.groupName)) return;
+
+  const bg = screen.querySelector('.oasis-bg');
+  if (!bg || !bg.contains(e.target)) return;
+
+  // Don't fire when clicking the UI panel (team badge, wait box, back button)
+  const ui = bg.querySelector('.oasis-ui');
+  if (ui && ui.contains(e.target)) return;
+
+  const rect = bg.getBoundingClientRect();
+
+  // Convert click position to % within oasis-bg
+  const xPct = ((e.clientX - rect.left) / rect.width)  * 100;
+  // y: 0% at bottom, 100% at top (match the creature's `bottom` CSS prop)
+  const yPct = ((rect.bottom - e.clientY) / rect.height) * 100;
+
+  // Show ripple at click spot
+  const ripple = document.createElement('div');
+  ripple.className = 'oasis-click-ripple';
+  ripple.style.left = (e.clientX - rect.left) + 'px';
+  ripple.style.top  = (e.clientY - rect.top)  + 'px';
+  bg.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 950);
+
+  // Move the current group's creature
+  _moveMyCreature(xPct, yPct);
+}, false);
+
+// ─── TOUCH SUPPORT ──────────────────────────────────────────────
+document.addEventListener('touchstart', function(e) {
+  // Handled via the click event (mobile triggers both)
+}, { passive: true });
+
+console.log('🐠 Lobby creature system ready');
+</script>
+
 <!-- ═══════════════════ FIREBASE SDK ═══════════════════ -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
