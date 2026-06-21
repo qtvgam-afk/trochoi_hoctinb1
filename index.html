@@ -3022,7 +3022,7 @@
                     type="number"
                     placeholder="?"
                     step="0.01"
-                  />
+                  oninput="pushLiveState()" />
                   MB
                 </td>
               </tr>
@@ -3036,7 +3036,7 @@
                     type="number"
                     placeholder="?"
                     step="0.01"
-                  />
+                  oninput="pushLiveState()" />
                   MB
                 </td>
               </tr>
@@ -3050,7 +3050,7 @@
                     type="number"
                     placeholder="?"
                     step="0.01"
-                  />
+                  oninput="pushLiveState()" />
                   MB
                 </td>
               </tr>
@@ -3064,7 +3064,7 @@
                     type="number"
                     placeholder="?"
                     step="0.01"
-                  />
+                  oninput="pushLiveState()" />
                   MB
                 </td>
               </tr>
@@ -3713,6 +3713,24 @@
       </div>
     </div>
 
+    <!-- ═══════════════════ LIVE VIEW MODAL (GV xem màn hình nhóm) ═══════════════════ -->
+    <div class="modal-overlay" id="live-view-modal">
+      <div class="modal-box" style="max-width:680px;max-height:85vh;display:flex;flex-direction:column;padding:0;overflow:hidden">
+        <div style="background:linear-gradient(135deg,#065f46,#0b6e4f);color:#fff;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem">
+          <div>
+            <div style="font-family:'Exo 2',sans-serif;font-weight:800;font-size:1.05rem" id="lv-group-name">Nhóm</div>
+            <div style="font-size:.78rem;opacity:.8" id="lv-group-stage">Đang ở chặng…</div>
+          </div>
+          <button onclick="closeLiveView()" style="background:rgba(255,255,255,.15);border:none;color:#fff;font-size:1.1rem;width:30px;height:30px;border-radius:50%;cursor:pointer;font-weight:700;line-height:1">×</button>
+        </div>
+        <div id="lv-body" style="padding:1.1rem 1.25rem;overflow-y:auto;flex:1;background:var(--bg)"></div>
+        <div style="padding:.65rem 1.25rem;border-top:1px solid var(--border);font-size:.72rem;color:var(--mu);display:flex;align-items:center;gap:.4rem">
+          <span style="width:7px;height:7px;border-radius:50%;background:#22c55e;display:inline-block;animation:pulse 1.4s infinite"></span>
+          Tự động cập nhật mỗi 2 giây — Đây là màn hình thực tế nhóm đang thấy
+        </div>
+      </div>
+    </div>
+
     <script>
       // ═══════════════════════════════════════════
       //  GAME DATA
@@ -3889,7 +3907,7 @@
       // ═══════════════════════════════════════════
           // Firebase state — populated by Firebase listener (firebase-module at bottom)
       window.fbReady = window.fbReady || false;
-      window.fbState = window.fbState || { gameStarted: false, gameStopped: null, groups: {}, waiting: {} };
+      window.fbState = window.fbState || { gameStarted: false, gameStopped: null, groups: {}, waiting: {}, currentStage: 1, stageStartedAt: null };
       window.fbSet    = window.fbSet    || ((p,v) => console.warn("Firebase not ready yet"));
       window.fbRemove = window.fbRemove || ((p)   => console.warn("Firebase not ready yet"));
 
@@ -3999,22 +4017,47 @@
       }
 
       function teacherNextStage() {
+        if (typeof window.fbSet !== 'function') {
+          showToast('⚠️ Chưa kết nối được máy chủ, vui lòng đợi vài giây rồi thử lại.', 'error');
+          console.warn('teacherNextStage: window.fbSet chưa sẵn sàng');
+          return;
+        }
         const cur = fbState.currentStage || 1;
+        const now = Date.now();
+
         if (cur >= 4) {
-          fbSet('currentStage', 5);
-          fbSet('stageStartedAt', Date.now());
+          // Cập nhật lạc quan cục bộ — thanh GV đổi ngay, không cần chờ Firebase phản hồi
+          fbState.currentStage = 5;
+          fbState.stageStartedAt = now;
           stopTeacherTimer();
           updateTeacherStageBar();
           showToast('🏁 Đã kết thúc trò chơi — Đang chiếu bảng xếp hạng!', 'success');
+          Promise.all([
+            window.fbSet('currentStage', 5),
+            window.fbSet('stageStartedAt', now),
+          ]).catch(e => {
+            console.error('teacherNextStage (finish) lỗi:', e);
+            showToast('❌ Lỗi lưu trạng thái lên máy chủ: ' + (e && e.message ? e.message : e), 'error');
+          });
           setTimeout(() => { loadTeacherData(); showLeaderboard(); }, 300);
           return;
         }
+
         const next = cur + 1;
-        fbSet('currentStage', next);
-        fbSet('stageStartedAt', Date.now());
+        // Cập nhật lạc quan cục bộ trước, để thanh điều khiển GV đổi ngay lập tức
+        fbState.currentStage = next;
+        fbState.stageStartedAt = now;
         updateTeacherStageBar();
         startTeacherTimer();
         showToast('➡️ Chuyển sang ' + (STAGE_NAMES[next] || ''), 'success');
+
+        Promise.all([
+          window.fbSet('currentStage', next),
+          window.fbSet('stageStartedAt', now),
+        ]).catch(e => {
+          console.error('teacherNextStage lỗi:', e);
+          showToast('❌ Lỗi lưu trạng thái lên máy chủ: ' + (e && e.message ? e.message : e), 'error');
+        });
       }
 
       function teacherStopGame() {
@@ -4278,6 +4321,10 @@
           setTimeout(() => {
             flash.remove();
             startGame();
+            // Dự phòng: vẫn poll định kỳ trong lúc chơi, phòng khi listener Firebase
+            // bị trễ/mất kết nối tạm thời, đảm bảo chặng vẫn được đồng bộ.
+            clearInterval(_studentPollInterval);
+            _studentPollInterval = setInterval(updateStudentWaitUI, 2000);
           }, 900);
         }
         // Update creature display if waiting
@@ -4289,6 +4336,7 @@
 
       // Giáo viên đã kết thúc Chặng 4 → hiện bảng xếp hạng ngay cho học sinh
       function finishGameNow() {
+        stopStudentPoll();
         state.currentStage = 5;
         if (state.timerInterval) { clearInterval(state.timerInterval); state.timerInterval = null; }
         const { c1, c2, c3, c4 } = state.scores;
@@ -4568,6 +4616,7 @@
           .forEach((b) => b.classList.remove("active"));
         const activeBtns = card.querySelectorAll(".sig-btn." + choice);
         activeBtns.forEach((b) => b.classList.add("active"));
+        pushLiveState();
       }
 
       function submitC1() {
@@ -4652,6 +4701,7 @@
 
         // Chỉ đánh dấu nút đã chọn, không hiển thị đúng sai
         btn.classList.add("selected");
+        pushLiveState();
       }
 
       function submitC2() {
@@ -4784,6 +4834,7 @@
         pb.textContent = labels[pri];
         pb.style.display = "";
         buildTop3Chips();
+        pushLiveState();
       }
 
       function buildTop3Chips() {
@@ -4912,7 +4963,7 @@
             (c, i) => `
     <div class="encode-cell">
       <div class="encode-letter">${c}</div>
-      <input class="encode-input" id="ei-${i}" type="number" min="1" max="26" placeholder="??" maxlength="2">
+      <input class="encode-input" id="ei-${i}" type="number" min="1" max="26" placeholder="??" maxlength="2" oninput="pushLiveState()">
     </div>
   `,
           )
@@ -4923,6 +4974,7 @@
         document.getElementById("received-code").textContent = rc;
         document.getElementById("decode-input").value = "";
         document.getElementById("decode-input").className = "decode-answer";
+        pushLiveState();
       }
 
       function submitC4() {
@@ -5355,6 +5407,7 @@
               <span class="group-obs-total-val">${total}</span>
             </div>
             <div class="group-obs-hint">🆘 Thẻ cứu còn: ${hintsLeft} · ${timeInfo}</div>
+            ${isPlaying ? `<button class="btn btn-teal btn-sm" style="width:100%;margin-top:.5rem;font-size:.72rem;padding:.4rem .6rem" onclick='openLiveView(${JSON.stringify(g.name)})'>👁 Xem trực tiếp màn hình</button>` : ''}
           </div>`;
         }).join('');
       }
@@ -5893,8 +5946,20 @@ console.log('🐠 Lobby creature system ready');
   // Expose helpers to global scope
   window.fbReady = false;
   window.fbState = { gameStarted: false, gameStopped: null, groups: {}, waiting: {} };
-  window.fbSet    = (path, value) => set(ref(db, path), value).catch(e => console.error("fbSet", path, e));
-  window.fbRemove = (path)        => remove(ref(db, path)).catch(e => console.error("fbRemove", path, e));
+  window.fbSet    = (path, value) => set(ref(db, path), value).catch(e => {
+    console.error("fbSet", path, e);
+    if (typeof window.showToast === 'function') {
+      window.showToast('❌ Lỗi lưu "' + path + '" lên máy chủ: ' + (e && e.message ? e.message : e), 'error');
+    }
+    throw e;
+  });
+  window.fbRemove = (path)        => remove(ref(db, path)).catch(e => {
+    console.error("fbRemove", path, e);
+    if (typeof window.showToast === 'function') {
+      window.showToast('❌ Lỗi xóa "' + path + '" trên máy chủ: ' + (e && e.message ? e.message : e), 'error');
+    }
+    throw e;
+  });
 
   // Listen to entire game node (realtime sync across all devices)
   onValue(ref(db, '/'), (snap) => {
@@ -5904,6 +5969,8 @@ console.log('🐠 Lobby creature system ready');
     window.fbState.gameStarted = data.gameStarted === true;
     window.fbState.gameStopped = data.gameStopped || null;
     window.fbState.waiting     = data.waiting     || {};
+    window.fbState.currentStage   = (typeof data.currentStage === 'number') ? data.currentStage : 1;
+    window.fbState.stageStartedAt = data.stageStartedAt || null;
 
     // Sync teacherGroups array from Firebase
     const raw = data.groups || {};
@@ -5934,4 +6001,3 @@ console.log('🐠 Lobby creature system ready');
 
   console.log("\ud83d\udd25 Firebase connected — giai-ma-tin-hieu-xanh");
 </script>
-
