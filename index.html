@@ -4305,6 +4305,7 @@
             finishGameNow();
             return;
           } else if (fbStage >= 1 && fbStage <= 4 && fbStage > state.currentStage) {
+            forceCompleteCurrentStageIfNeeded();
             gotoStage(fbStage);
           }
         }
@@ -4337,6 +4338,7 @@
       // Giáo viên đã kết thúc Chặng 4 → hiện bảng xếp hạng ngay cho học sinh
       function finishGameNow() {
         stopStudentPoll();
+        forceCompleteCurrentStageIfNeeded();
         state.currentStage = 5;
         if (state.timerInterval) { clearInterval(state.timerInterval); state.timerInterval = null; }
         const { c1, c2, c3, c4 } = state.scores;
@@ -4368,6 +4370,10 @@
         state.groupName = '';
         state.currentStage = 1;
         state.scores = { c1: 0, c2: 0, c3: 0, c4: 0 };
+        state.c1Submitted = false;
+        state.c2Submitted = false;
+        state.c3Submitted = false;
+        state.c4Submitted = false;
         state.hintsUsed = 0;
         if (state.timerInterval) { clearInterval(state.timerInterval); state.timerInterval = null; }
         stopTeacherTimer();
@@ -4377,6 +4383,8 @@
       }
 
       function forceSaveAndReturnToOasis() {
+        // Chấm điểm phần học sinh đã làm ở chặng hiện tại trước khi lưu, nếu chưa nộp
+        forceCompleteCurrentStageIfNeeded();
         // Save current progress with whatever scores we have
         const { c1, c2, c3, c4 } = state.scores;
         const bonusCalc = state.hintsUsed === 0 ? 3 : -(state.hintsUsed * 3);
@@ -4503,6 +4511,10 @@
         state.groupName = name;
         state.currentStage = 1;
         state.scores = { c1: 0, c2: 0, c3: 0, c4: 0 };
+        state.c1Submitted = false;
+        state.c2Submitted = false;
+        state.c3Submitted = false;
+        state.c4Submitted = false;
         state.hintsUsed = 0;
         state.startTime = Date.now();
         // Random keyword selection
@@ -4519,6 +4531,16 @@
         buildC1();
         gotoStage(1);
         saveStudentProgress();
+      }
+
+      // Nếu học sinh chưa nộp bài chặng hiện tại mà bị giáo viên chuyển/kết thúc
+      // chặng, vẫn chấm điểm trên phần đã làm thay vì để 0 điểm.
+      function forceCompleteCurrentStageIfNeeded() {
+        const n = state.currentStage;
+        if (n === 1 && !state.c1Submitted) submitC1(true);
+        else if (n === 2 && !state.c2Submitted) submitC2(true);
+        else if (n === 3 && !state.c3Submitted) submitC3(true);
+        else if (n === 4 && !state.c4Submitted) submitC4(true);
       }
 
       function gotoStage(n) {
@@ -4619,9 +4641,9 @@
         pushLiveState();
       }
 
-      function submitC1() {
+      function submitC1(force) {
         const answered = Object.keys(state.c1Answers).length;
-        if (answered < SIGNALS_DATA.length) {
+        if (!force && answered < SIGNALS_DATA.length) {
           showFeedback(
             "c1-feedback",
             "err",
@@ -4629,6 +4651,7 @@
           );
           return;
         }
+        state.c1Submitted = true;
         let correct = 0;
         let reviewHtml = '<div class="sec-title">Kết quả từng thẻ</div>';
         SIGNALS_DATA.forEach((s) => {
@@ -4660,6 +4683,7 @@
         document.getElementById("c1-answers-review").innerHTML = reviewHtml;
         updateScoreBar();
         saveStudentProgress();
+        if (force) return;
         showScreen("s-result-1");
         document.getElementById("game-bar").style.display = "flex";
         document.getElementById("stage-dots-bar").style.display = "flex";
@@ -4704,7 +4728,7 @@
         pushLiveState();
       }
 
-      function submitC2() {
+      function submitC2(force) {
         state.c2Submitted = true;
         const answers = [
           { id: "c2-i1", correct: 2, tol: 0.05 },
@@ -4764,6 +4788,7 @@
         document.getElementById("c2-answers-review").innerHTML = reviewHtml;
         updateScoreBar();
         saveStudentProgress();
+        if (force) return;
         showScreen("s-result-2");
         document.getElementById("game-bar").style.display = "flex";
         document.getElementById("stage-dots-bar").style.display = "flex";
@@ -4872,9 +4897,9 @@
         }
       }
 
-      function submitC3() {
+      function submitC3(force) {
         const priCount = Object.keys(state.c3Priorities).length;
-        if (priCount < VICTIMS_DATA.length) {
+        if (!force && priCount < VICTIMS_DATA.length) {
           showFeedback(
             "c3-feedback",
             "err",
@@ -4882,7 +4907,7 @@
           );
           return;
         }
-        if (state.c3Top3.length !== 3) {
+        if (!force && state.c3Top3.length !== 3) {
           showFeedback(
             "c3-feedback",
             "err",
@@ -4890,6 +4915,7 @@
           );
           return;
         }
+        state.c3Submitted = true;
 
         // Score: 6 for correct removals + 15 for correct top3 + 4 for explanation
         const correctRemovals = [4, 7]; // Minh, Hoa
@@ -4930,6 +4956,7 @@
         document.getElementById("c3-answers-review").innerHTML = reviewHtml;
         updateScoreBar();
         saveStudentProgress();
+        if (force) return;
         showScreen("s-result-3");
         document.getElementById("game-bar").style.display = "flex";
         document.getElementById("stage-dots-bar").style.display = "flex";
@@ -4977,7 +5004,8 @@
         pushLiveState();
       }
 
-      function submitC4() {
+      function submitC4(force) {
+        state.c4Submitted = true;
         const kw = state.keyword;
         const codes = KEYWORDS[kw];
         let encodeScore = 0;
@@ -5018,6 +5046,7 @@
           state.timerInterval = null;
         }
         saveStudentProgress();
+        if (force) return;
         showScreen("s-result-4");
         document.getElementById("game-bar").style.display = "flex";
         document.getElementById("stage-dots-bar").style.display = "flex";
