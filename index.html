@@ -1511,6 +1511,41 @@
         font-size: .95rem;
       }
 
+      /* ── LIVE VIEW MODAL (xem trực tiếp màn hình 1 nhóm) ─── */
+      .lv-empty {
+        text-align: center;
+        color: var(--mu);
+        padding: 2rem 1rem;
+        font-size: .92rem;
+      }
+      .lv-section-title {
+        font-size: .78rem;
+        font-weight: 700;
+        color: var(--txt2);
+        text-transform: uppercase;
+        letter-spacing: .02em;
+        margin-bottom: .35rem;
+      }
+      .lv-row {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        padding: .45rem .6rem;
+        border-radius: var(--rs);
+        margin-bottom: .35rem;
+        font-size: .85rem;
+        border: 1.5px solid var(--border);
+        background: #fff;
+      }
+      .lv-row .lv-icon { font-size: 1rem; flex-shrink: 0; }
+      .lv-row .lv-label { flex: 1; font-weight: 600; color: var(--txt); }
+      .lv-row .lv-choice { font-size: .8rem; color: var(--txt2); text-align: right; white-space: nowrap; }
+      .lv-row.lv-pending { background: var(--bg); border-color: var(--border); }
+      .lv-row.lv-ok { background: #f0fdf4; border-color: var(--border2); }
+      .lv-row.lv-ok .lv-choice { color: var(--g1); font-weight: 700; }
+      .lv-row.lv-bad { background: #fff7f7; border-color: #fca5a5; }
+      .lv-row.lv-bad .lv-choice { color: var(--red); font-weight: 700; }
+
       /* ── TEACHER DASHBOARD ─── */
       #s-teacher-dash.active {
         display: block;
@@ -3304,7 +3339,7 @@
             type="text"
             placeholder="Nhập từ đã giải mã..."
             maxlength="10"
-            oninput="this.value = this.value.toUpperCase()"
+            oninput="this.value = this.value.toUpperCase(); pushLiveState()"
           />
         </div>
 
@@ -4039,7 +4074,9 @@
             console.error('teacherNextStage (finish) lỗi:', e);
             showToast('❌ Lỗi lưu trạng thái lên máy chủ: ' + (e && e.message ? e.message : e), 'error');
           });
-          setTimeout(() => { loadTeacherData(); showLeaderboard(); }, 300);
+          // Chấm điểm hộ những nhóm chưa nộp kịp Chặng 4 trước khi chiếu BXH
+          setTimeout(() => finalizeStaleGroups(4), 4000);
+          setTimeout(() => { loadTeacherData(); showLeaderboard(); }, 4300);
           return;
         }
 
@@ -4058,6 +4095,10 @@
           console.error('teacherNextStage lỗi:', e);
           showToast('❌ Lỗi lưu trạng thái lên máy chủ: ' + (e && e.message ? e.message : e), 'error');
         });
+        // Cho học sinh đang kết nối vài giây để tự nộp (forceCompleteCurrentStageIfNeeded
+        // chạy ngay trên máy của họ qua Firebase listener); sau đó GV chấm hộ phần còn dang dở
+        // của những nhóm chưa kịp nộp (ví dụ mất kết nối/đóng tab).
+        setTimeout(() => finalizeStaleGroups(cur), 4000);
       }
 
       function teacherStopGame() {
@@ -4065,8 +4106,11 @@
         updateGameStatusUI();
         stopTeacherTimer();
         showToast('⏹ Đã dừng trò chơi.', 'error');
+        // Chấm điểm hộ phần dang dở của nhóm chưa kịp tự nộp ở chặng đang dừng
+        const stoppedStage = fbState.currentStage || 1;
+        setTimeout(() => finalizeStaleGroups(stoppedStage), 1800);
         // Delay nhỏ để Firebase onValue kịp sync teacherGroups trước khi hiển thị modal
-        setTimeout(showFinalScoreModal, 600);
+        setTimeout(showFinalScoreModal, 2400);
       }
 
       function _clearFirebaseAfterGame() {
@@ -4076,8 +4120,62 @@
           window.fbRemove('gameStopped');
           window.fbRemove('waiting');
           window.fbRemove('groups');
+          window.fbRemove('live');
         }
         console.log('🧹 Firebase data cleared after game ended.');
+      }
+
+      // ═══════════════════════════════════════════
+      //  CHẤM ĐIỂM HỘ NHÓM CHƯA NỘP (khi GV chuyển/kết thúc chặng)
+      // ═══════════════════════════════════════════
+      // leavingStage: số chặng (1-4) mà GV vừa rời khỏi (chuyển tiếp hoặc dừng game).
+      // Với mỗi nhóm còn kẹt ở đúng chặng đó VÀ chưa có cờ "đã nộp" cho chặng đó,
+      // dùng dữ liệu màn hình trực tiếp (live/{slug}) — được đồng bộ liên tục qua
+      // pushLiveState() — để chấm điểm trên phần đã làm, giống hệt công thức chấm
+      // thật, rồi lưu lên Firebase. Nhóm đã tự nộp (hoặc tự bị buộc nộp ngay trên
+      // máy của họ) sẽ có cờ cXSubmitted = true và được bỏ qua, tránh chấm đè.
+      function finalizeStaleGroups(leavingStage) {
+        if (!leavingStage || leavingStage < 1 || leavingStage > 4) return;
+        const submittedKey = 'c' + leavingStage + 'Submitted';
+        const groups = getGroups();
+        let any = false;
+
+        groups.forEach(g => {
+          if (g.complete) return;
+          if (g[submittedKey]) return; // đã được chấm chính thức rồi
+          const slug = slugify(g.name);
+          const live = (fbState.live || {})[slug];
+          if (!live) return; // chưa có dữ liệu trực tiếp nào để chấm hộ
+          if ((live.currentStage || 1) !== leavingStage) return; // dữ liệu live không khớp chặng đang xét
+
+          let score = 0;
+          if (leavingStage === 1) score = computeC1Score(live.c1Answers);
+          else if (leavingStage === 2) score = computeC2Score(live.c2Units, live.c2MC);
+          else if (leavingStage === 3) score = computeC3Score(live.c3Priorities, live.c3Top3);
+          else if (leavingStage === 4) score = computeC4Score(live.c4Encode, live.c4Decode, live.keyword, live.receivedKeyword);
+
+          const newScores = { c1: 0, c2: 0, c3: 0, c4: 0, ...(g.scores || {}) };
+          newScores['c' + leavingStage] = score;
+          const payload = { ...g, scores: newScores };
+          payload[submittedKey] = true;
+          if (typeof window.fbSet === 'function') window.fbSet('groups/' + slug, payload);
+
+          let existing = teacherGroups.find(x => x.name === g.name);
+          if (!existing) {
+            existing = { name: g.name, scores: { c1: 0, c2: 0, c3: 0, c4: 0 }, bonus: 0, complete: false };
+            teacherGroups.push(existing);
+          }
+          existing.scores = newScores;
+          existing[submittedKey] = true;
+
+          any = true;
+          showToast(`⏱️ Đã tự chấm Chặng ${leavingStage} cho nhóm "${g.name}" (chưa nộp kịp)`, 'success');
+        });
+
+        if (any) {
+          if (typeof renderTeacherTable === 'function') renderTeacherTable();
+          if (typeof refreshGroupObservation === 'function') refreshGroupObservation();
+        }
       }
 
       // ═══════════════════════════════════════════
@@ -4116,6 +4214,13 @@
         }
         empty.style.display = 'none';
 
+        // Helper hiển thị thời gian chờ dạng "Xs" hoặc "Xp Ys"
+        const fmtWait = (joinedAt) => {
+          const sec = Math.max(0, Math.round((Date.now() - (joinedAt || Date.now())) / 1000));
+          if (sec < 60) return sec + 's';
+          return Math.floor(sec / 60) + 'p ' + (sec % 60) + 's';
+        };
+
         // Build/update cards
         const existingNames = new Set([...grid.querySelectorAll('.monitor-card')].map(c => c.dataset.name));
         const newNames = new Set(waiting.map(d => d.name));
@@ -4136,7 +4241,7 @@
             card.innerHTML = `
               <div class="mc-icon">${icon}</div>
               <div class="mc-name">${d.name}</div>
-              <div class="mc-status">⏳ Đang chờ</div>
+              <div class="mc-status">⏳ Đang chờ <span class="mc-wait"></span></div>
             `;
             card.style.cssText = `
               display:flex;flex-direction:column;align-items:center;gap:4px;
@@ -4147,6 +4252,13 @@
             `;
             grid.appendChild(card);
           }
+        });
+
+        // Luôn cập nhật thời gian chờ (cho cả thẻ vừa tạo lẫn thẻ đã có)
+        waiting.forEach(d => {
+          const card = grid.querySelector(`.monitor-card[data-name="${(window.CSS && CSS.escape) ? CSS.escape(d.name) : d.name}"]`);
+          const waitEl = card && card.querySelector('.mc-wait');
+          if (waitEl) waitEl.textContent = '· ' + fmtWait(d.joinedAt);
         });
       }
 
@@ -4364,6 +4476,7 @@
           window.fbRemove('groups');
           window.fbRemove('currentStage');
           window.fbRemove('stageStartedAt');
+          window.fbRemove('live');
         }
         teacherGroups = [];
         window.teacherGroups = [];
@@ -4604,6 +4717,119 @@
         } else {
           el.textContent = `${m}:${s.toString().padStart(2, "0")}`;
           el.className = "gb-timer" + (left < 30 ? " urgent" : "");
+        }
+      }
+
+      // ═══════════════════════════════════════════
+      //  CHẤM ĐIỂM THUẦN (dùng chung: học sinh tự nộp & GV chấm hộ khi
+      //  học sinh chưa nộp bài mà đã bị chuyển/kết thúc chặng)
+      // ═══════════════════════════════════════════
+      function computeC1Score(answers) {
+        answers = answers || {};
+        let correct = 0;
+        SIGNALS_DATA.forEach((s) => { if (answers[s.id] === s.correct) correct++; });
+        let score = correct * 4;
+        if (correct === SIGNALS_DATA.length) score += 5;
+        return Math.min(25, score);
+      }
+
+      function computeC2Score(unitVals, mcAnswers) {
+        unitVals = unitVals || {};
+        mcAnswers = mcAnswers || {};
+        const corrects = [
+          { id: "c2-i1", val: 2, tol: 0.05 },
+          { id: "c2-i2", val: 1, tol: 0.05 },
+          { id: "c2-i3", val: 512, tol: 1 },
+          { id: "c2-i4", val: 0.5, tol: 0.02 },
+        ];
+        let convScore = 0;
+        corrects.forEach((a) => {
+          const val = parseFloat(unitVals[a.id]);
+          if (!isNaN(val) && Math.abs(val - a.val) <= a.tol) convScore += 2.5;
+        });
+        let mcScore = 0;
+        for (let q = 1; q <= 5; q++) {
+          if (mcAnswers[q] && mcAnswers[q].correct) mcScore += 3;
+        }
+        return Math.min(25, convScore + mcScore);
+      }
+
+      function computeC3Score(priorities, top3) {
+        priorities = priorities || {};
+        top3 = top3 || [];
+        const correctRemovals = [4, 7];
+        let removalScore = 0;
+        correctRemovals.forEach((id) => { if (priorities[id] === "px") removalScore += 3; });
+        const userTop3Set = new Set(top3);
+        let top3Score = 0;
+        CORRECT_TOP3.forEach((id) => { if (userTop3Set.has(id)) top3Score += 5; });
+        const bonusExplanation = 4; // luôn cộng vì không yêu cầu giải thích bằng văn bản
+        return Math.min(25, removalScore + top3Score + bonusExplanation);
+      }
+
+      function computeC4Score(encodeVals, decodeVal, keyword, receivedKeyword) {
+        encodeVals = encodeVals || {};
+        const kw = keyword || "XANH";
+        const codes = KEYWORDS[kw] || KEYWORDS.XANH;
+        let encodeScore = 0;
+        kw.split("").forEach((c, i) => {
+          const val = parseInt(encodeVals[i]);
+          if (val === codes[i]) encodeScore += 3;
+        });
+        encodeScore = Math.min(12, encodeScore);
+        const decoded = (decodeVal || "").trim().toUpperCase();
+        const expected = receivedKeyword || "";
+        const decodeScore = expected && decoded === expected ? 13 : 0;
+        return Math.min(25, encodeScore + decodeScore);
+      }
+
+      // ═══════════════════════════════════════════
+      //  ĐỒNG BỘ MÀN HÌNH HỌC SINH LÊN FIREBASE (để GV "Quan sát màn hình")
+      // ═══════════════════════════════════════════
+      let _pushLiveTimer = null;
+      function pushLiveState() {
+        // Gộp các lần gọi liên tiếp (debounce) để không spam Firebase khi gõ nhanh
+        clearTimeout(_pushLiveTimer);
+        _pushLiveTimer = setTimeout(_doPushLiveState, 300);
+      }
+
+      function _doPushLiveState() {
+        try {
+          if (!state.groupName) return;
+          if (typeof window.fbSet !== "function") return;
+          const key = slugify(state.groupName);
+
+          const c4Encode = {};
+          if (state.keyword) {
+            state.keyword.split("").forEach((_, i) => {
+              const el = document.getElementById("ei-" + i);
+              if (el) c4Encode[i] = el.value;
+            });
+          }
+          const c2i = (id) => {
+            const el = document.getElementById(id);
+            return el ? el.value : "";
+          };
+          const decodeEl = document.getElementById("decode-input");
+
+          const payload = {
+            name: state.groupName,
+            currentStage: state.currentStage || 1,
+            updatedAt: Date.now(),
+            hintsUsed: state.hintsUsed || 0,
+            keyword: state.keyword || "",
+            receivedKeyword: state.receivedKeyword || "",
+            c1Answers: state.c1Answers || {},
+            c2Units: { "c2-i1": c2i("c2-i1"), "c2-i2": c2i("c2-i2"), "c2-i3": c2i("c2-i3"), "c2-i4": c2i("c2-i4") },
+            c2MC: c2MCAnswers || {},
+            c3Priorities: state.c3Priorities || {},
+            c3Top3: state.c3Top3 || [],
+            c4Encode: c4Encode,
+            c4Decode: decodeEl ? decodeEl.value : "",
+          };
+          window.fbSet("live/" + key, payload);
+        } catch (e) {
+          console.error("pushLiveState error:", e);
         }
       }
 
@@ -5196,6 +5422,7 @@
         if (!confirm("Xóa tất cả nhóm?")) return;
         teacherGroups = [];
         fbSet('groups', null);
+        fbSet('live', null);
         saveTeacherData();
         renderTeacherTable();
       }
@@ -5244,7 +5471,10 @@
 
       function removeGroup(idx) {
         const g = teacherGroups[idx];
-        if (g) fbRemove('groups/' + slugify(g.name));
+        if (g) {
+          fbRemove('groups/' + slugify(g.name));
+          fbRemove('live/' + slugify(g.name));
+        }
         teacherGroups.splice(idx, 1);
         saveTeacherData();
         renderTeacherTable();
@@ -5268,12 +5498,22 @@
             finishedAt: Date.now(),
             currentStage: state.currentStage || 1,
             hintsUsed: state.hintsUsed || 0,
+            // Cờ đã nộp từng chặng — để GV biết chặng nào là HS tự nộp thật
+            // (tránh bị chấm hộ đè điểm khi GV bấm "Chặng tiếp theo")
+            c1Submitted: !!state.c1Submitted,
+            c2Submitted: !!state.c2Submitted,
+            c3Submitted: !!state.c3Submitted,
+            c4Submitted: !!state.c4Submitted,
           };
 
           // Nếu fbSet chưa sẵn sàng thì retry sau 1 giây (module load chậm)
           function doSave(retries) {
             if (typeof window.fbSet === 'function') {
               window.fbSet('groups/' + key, payload);
+              // Đã hoàn thành toàn bộ trò chơi → dọn dữ liệu màn hình trực tiếp
+              if (complete && typeof window.fbRemove === 'function') {
+                window.fbRemove('live/' + key);
+              }
             } else if (retries > 0) {
               setTimeout(() => doSave(retries - 1), 1000);
             }
@@ -5293,6 +5533,10 @@
           existing.finishedAt  = Date.now();
           existing.hintsUsed   = state.hintsUsed;
           existing.currentStage = state.currentStage || 1;
+          existing.c1Submitted = !!state.c1Submitted;
+          existing.c2Submitted = !!state.c2Submitted;
+          existing.c3Submitted = !!state.c3Submitted;
+          existing.c4Submitted = !!state.c4Submitted;
         } catch (e) { console.error('saveStudentProgress error:', e); }
       }
 
@@ -5439,6 +5683,121 @@
             ${isPlaying ? `<button class="btn btn-teal btn-sm" style="width:100%;margin-top:.5rem;font-size:.72rem;padding:.4rem .6rem" onclick='openLiveView(${JSON.stringify(g.name)})'>👁 Xem trực tiếp màn hình</button>` : ''}
           </div>`;
         }).join('');
+      }
+
+      // ═══════════════════════════════════════════
+      //  XEM TRỰC TIẾP MÀN HÌNH 1 NHÓM (mirror real-time, chỉ xem)
+      // ═══════════════════════════════════════════
+      let _liveViewName = null;
+      let _liveViewInterval = null;
+
+      function openLiveView(name) {
+        _liveViewName = name;
+        let modal = document.getElementById('live-view-modal');
+        if (!modal) {
+          modal = document.createElement('div');
+          modal.id = 'live-view-modal';
+          modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:1rem;animation:fadeIn .25s ease';
+          modal.addEventListener('click', (e) => { if (e.target === modal) closeLiveView(); });
+          document.body.appendChild(modal);
+        }
+        renderLiveView();
+        clearInterval(_liveViewInterval);
+        // Phòng trường hợp listener Firebase chưa kịp bắn — vẫn tự làm mới định kỳ
+        _liveViewInterval = setInterval(renderLiveView, 2000);
+      }
+
+      function closeLiveView() {
+        _liveViewName = null;
+        clearInterval(_liveViewInterval);
+        _liveViewInterval = null;
+        const modal = document.getElementById('live-view-modal');
+        if (modal) modal.remove();
+      }
+
+      function renderLiveView() {
+        if (!_liveViewName) return;
+        const modal = document.getElementById('live-view-modal');
+        if (!modal) return;
+
+        const slug = slugify(_liveViewName);
+        const live = (fbState.live || {})[slug];
+        const group = getGroups().find(g => g.name === _liveViewName) || {};
+        const stageNum = live ? (live.currentStage || 1) : (group.complete ? 5 : (group.currentStage || 0));
+
+        let bodyHtml = '';
+        let estScore = null;
+
+        if (!live) {
+          bodyHtml = '<div class="lv-empty">⏳ Chưa có dữ liệu trực tiếp từ nhóm này.<br><span style="font-size:.8rem">Màn hình sẽ hiện ngay khi nhóm bắt đầu tương tác.</span></div>';
+        } else if (stageNum === 1) {
+          estScore = computeC1Score(live.c1Answers);
+          bodyHtml = SIGNALS_DATA.map(s => {
+            const choice = (live.c1Answers || {})[s.id];
+            const label = choice === 'raw' ? '📦 Dữ liệu thô' : choice === 'info' ? '✅ Thông tin' : '— chưa chọn —';
+            const cls = !choice ? 'lv-pending' : (choice === s.correct ? 'lv-ok' : 'lv-bad');
+            return `<div class="lv-row ${cls}">
+              <span class="lv-icon">${s.icon}</span>
+              <span class="lv-label">${s.label}</span>
+              <span class="lv-choice">${label}</span>
+            </div>`;
+          }).join('');
+        } else if (stageNum === 2) {
+          estScore = computeC2Score(live.c2Units, live.c2MC);
+          const labels = ['🗺️ Bản đồ', '📸 Ảnh', '🎥 Video', '📋 Danh sách'];
+          const ids = ['c2-i1', 'c2-i2', 'c2-i3', 'c2-i4'];
+          bodyHtml = '<div class="lv-section-title">Đổi đơn vị về MB</div>' + ids.map((id, i) => {
+            const v = (live.c2Units || {})[id];
+            return `<div class="lv-row ${v ? 'lv-pending' : 'lv-pending'}"><span class="lv-label">${labels[i]}</span><span class="lv-choice">${v ? v + ' MB' : '— chưa nhập —'}</span></div>`;
+          }).join('');
+          bodyHtml += '<div class="lv-section-title" style="margin-top:.75rem">Trắc nghiệm</div>';
+          for (let q = 1; q <= 5; q++) {
+            const a = (live.c2MC || {})[q];
+            const cls = !a ? 'lv-pending' : (a.correct ? 'lv-ok' : 'lv-bad');
+            bodyHtml += `<div class="lv-row ${cls}"><span class="lv-label">Câu ${q}</span><span class="lv-choice">${a ? 'Đã chọn 1 đáp án' : '— chưa chọn —'}</span></div>`;
+          }
+        } else if (stageNum === 3) {
+          estScore = computeC3Score(live.c3Priorities, live.c3Top3);
+          const priLabels = { p1: '🔴 P1', p2: '🟡 P2', pw: '🟢 Chờ', px: '⬛ Loại' };
+          bodyHtml = VICTIMS_DATA.map(v => {
+            const p = (live.c3Priorities || {})[v.id];
+            const inTop3 = (live.c3Top3 || []).includes(v.id);
+            return `<div class="lv-row lv-pending">
+              <span class="lv-icon">${v.icon}</span>
+              <span class="lv-label">${v.name}</span>
+              <span class="lv-choice">${p ? priLabels[p] : '— chưa gán —'}${inTop3 ? ' · ⭐Top3' : ''}</span>
+            </div>`;
+          }).join('');
+        } else if (stageNum === 4) {
+          estScore = computeC4Score(live.c4Encode, live.c4Decode, live.keyword, live.receivedKeyword);
+          const kw = live.keyword || '';
+          bodyHtml = '<div class="lv-section-title">Mã hoá từ khoá: ' + (kw || '—') + '</div>';
+          bodyHtml += kw.split('').map((c, i) => {
+            const v = (live.c4Encode || {})[i];
+            return `<div class="lv-row lv-pending"><span class="lv-label">Chữ "${c}"</span><span class="lv-choice">${v || '— chưa nhập —'}</span></div>`;
+          }).join('');
+          bodyHtml += `<div class="lv-section-title" style="margin-top:.75rem">Giải mã từ nhóm kế bên</div><div class="lv-row lv-pending"><span class="lv-label">Đáp án</span><span class="lv-choice">${live.c4Decode || '— chưa nhập —'}</span></div>`;
+        } else {
+          bodyHtml = '<div class="lv-empty">✅ Nhóm đang chờ hoặc đã hoàn thành toàn bộ trò chơi.</div>';
+        }
+
+        const stageNames = { 1: 'Chặng 1 — Thu nhận', 2: 'Chặng 2 — Lưu trữ', 3: 'Chặng 3 — Xử lý', 4: 'Chặng 4 — Truyền tin' };
+        const updatedAgo = live ? Math.max(0, Math.round((Date.now() - (live.updatedAt || Date.now())) / 1000)) : null;
+
+        modal.innerHTML = `<div style="background:#fff;border-radius:18px;max-width:480px;width:100%;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden">
+          <div style="background:linear-gradient(135deg,#065f46,#0b6e4f);padding:1.1rem 1.25rem;color:#fff;position:relative;flex-shrink:0">
+            <div style="font-family:'Exo 2',sans-serif;font-weight:800;font-size:1.05rem;display:flex;align-items:center;gap:.4rem">
+              👁 ${_liveViewName} <span style="background:#22c55e;font-size:.65rem;padding:2px 8px;border-radius:999px;font-weight:700">LIVE</span>
+            </div>
+            <div style="font-size:.8rem;opacity:.85;margin-top:2px">${stageNames[stageNum] || 'Đang chờ / đã hoàn thành'}${updatedAgo != null ? ' · cập nhật ' + updatedAgo + 's trước' : ''}</div>
+            <button onclick="closeLiveView()" style="position:absolute;top:.7rem;right:.85rem;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:1.1rem;width:30px;height:30px;border-radius:50%;cursor:pointer;line-height:1">×</button>
+          </div>
+          <div style="padding:1rem 1.25rem;overflow-y:auto;flex:1">${bodyHtml}</div>
+          ${estScore != null ? `<div style="padding:.75rem 1.25rem;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;background:#f0fdf4;flex-shrink:0">
+            <span style="font-size:.82rem;color:var(--txt2);font-weight:600">Điểm ước tính nếu nộp ngay</span>
+            <span style="font-family:'Exo 2',sans-serif;font-weight:800;font-size:1.2rem;color:var(--g1)">${estScore} / 25</span>
+          </div>` : ''}
+        </div>`;
       }
 
       // ═══════════════════════════════════════════
@@ -5998,6 +6357,7 @@ console.log('🐠 Lobby creature system ready');
     window.fbState.gameStarted = data.gameStarted === true;
     window.fbState.gameStopped = data.gameStopped || null;
     window.fbState.waiting     = data.waiting     || {};
+    window.fbState.live        = data.live        || {};
     window.fbState.currentStage   = (typeof data.currentStage === 'number') ? data.currentStage : 1;
     window.fbState.stageStartedAt = data.stageStartedAt || null;
 
@@ -6016,7 +6376,14 @@ console.log('🐠 Lobby creature system ready');
       if (typeof renderTeacherTable === 'function') renderTeacherTable();
       if (typeof updateGameStatusUI  === 'function') updateGameStatusUI();
       if (typeof refreshMonitor      === 'function') refreshMonitor();
+      if (typeof refreshGroupObservation === 'function' &&
+          document.getElementById('tab-observe')?.classList.contains('active')) {
+        refreshGroupObservation();
+      }
     }
+
+    // Cập nhật khung "Xem trực tiếp màn hình" nếu đang mở
+    if (typeof renderLiveView === 'function') renderLiveView();
 
     // Re-render leaderboard nếu đang hiển thị (học sinh xem BXH sau khi nộp)
     const lb = document.getElementById('s-leaderboard');
